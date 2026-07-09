@@ -1,0 +1,8 @@
+model_list:
+  - model_name: gemma4
+    litellm_params:
+      model: ollama/your-model-name:latest
+      api_base: http://localhost:11434
+
+litellm_settings:
+  master_key: "replace-with-a-strong-secret"
