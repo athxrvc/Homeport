@@ -11,8 +11,6 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - `.env.example`, `.gitignore`, `.gitattributes`.
 - Documentation: rewritten README and setup guide, plus guides for using the API, tunnels, configuration, autostart, security, troubleshooting and an FAQ.
 - `CONTRIBUTING.md`, `SECURITY.md`, issue and pull request templates.
-- `tests/api_tests.py`: a portable API test suite anyone can run against their own gateway (about 25 checks), and `tests/README.md` with a checklist for platforms that haven't been tested.
-- `docs/testing.md`: the Windows 11 test report (what was tested, how, the results, the problems found, and what remains untested).
 
 ### Fixed
 - `master_key` was under `litellm_settings`, where LiteLLM ignores it, leaving the API unauthenticated. It now lives under `general_settings`.
@@ -30,4 +28,4 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ### Changed
 - Project renamed from "Local LLM API Gateway" to **Homeport**. Repository, clone and issue links, and the service, task and launch-agent names in the autostart guide were updated to match.
 - LiteLLM now listens on `127.0.0.1` by default instead of all interfaces.
-- Documented Python requirement corrected to "3.10 or newer": the gateway was tested end to end on 3.10, 3.12, 3.13 and 3.14 (and on 3.9, where pip installs an older LiteLLM, 1.83.9).
+- Documented Python requirement corrected to "3.10 or newer".

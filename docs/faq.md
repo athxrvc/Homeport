@@ -46,7 +46,7 @@ The gateway passes requests to LiteLLM and Ollama, so it depends on what LiteLLM
 Yes. Every model you've pulled is reachable by name. How many run at once, and how fast, is up to Ollama and your hardware.
 
 **Can I run it on a server, a Raspberry Pi or a home server?**
-Any machine that can run Ollama, LiteLLM and (optionally) cloudflared should work. Only Windows (PowerShell and Git Bash) has been tested by the maintainers so far. See the [tested matrix](../README.md#what-has-been-tested).
+Any machine that can run Ollama, LiteLLM and (optionally) cloudflared should work. So far it has only been run on Windows. See the [status](../README.md#status).
 
 **Is there a Docker setup?**
 Not yet. The scripts run everything natively. A tested Docker Compose setup would be a great contribution. See [CONTRIBUTING.md](../CONTRIBUTING.md).

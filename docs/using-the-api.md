@@ -149,7 +149,7 @@ This project doesn't ship instructions for specific third-party apps, because th
 
 Apps that fill a dropdown from `GET /v1/models` will see a made-up `ollama_chat/llama2` entry (older LiteLLM versions also showed `*`) instead of your real models. That is a side effect of the default catch-all config, which lets every model work without listing them one by one. **Chat requests still work**: you can type your model name into the app manually. Don't pick `ollama_chat/llama2` from the list unless you really have that model.
 
-If you want a proper dropdown, list your models explicitly in the config. `/v1/models` then shows exactly what you list (this was tested):
+If you want a proper dropdown, list your models explicitly in the config. `/v1/models` then shows exactly what you list:
 
 ```yaml
 # LiteLLM/config.yaml
@@ -166,8 +166,8 @@ Clients then use `general` as the model name. See [configuration.md](configurati
 
 **The first request is slow.** Ollama loads the model into memory on first use, and unloads it after a period of inactivity (5 minutes by default; the `OLLAMA_KEEP_ALIVE` environment variable changes this). After a quiet spell, expect the next request to take longer.
 
-**"Thinking" models.** Some models reason before answering and return that in a separate `reasoning_content` field. If `max_tokens` is small, the model can use it all up thinking and return an empty `content` with `finish_reason: "length"`. Raise `max_tokens` or leave it out. Reasoning models can also be slow: the one used for testing spent about a minute (roughly 15,000 tokens) thinking about a five-word greeting when no limit was set. For quick tasks, set `max_tokens` or use a non-reasoning model.
+**"Thinking" models.** Some models reason before answering and return that in a separate `reasoning_content` field. If `max_tokens` is small, the model can use it all up thinking and return an empty `content` with `finish_reason: "length"`. Raise `max_tokens` or leave it out. Reasoning models can also be slow, sometimes thinking for a minute or more about a trivial prompt when no limit is set. For quick tasks, set `max_tokens` or use a non-reasoning model.
 
-**Use streaming for long answers.** Streaming through the tunnel was tested and delivers tokens progressively, as it does locally. It also matters for a second reason, which was reproduced in testing: Cloudflare's proxy gives up on a request that gets no response data for roughly 100 seconds. A non-streaming request that ran past that limit through a quick tunnel came back as **HTTP 524**, while shorter ones on the same tunnel succeeded. With `stream: true`, data flows continuously and this can't happen.
+**Use streaming for long answers.** Streaming delivers tokens as they're generated, through the tunnel as well as locally. It also avoids a tunnel limit: Cloudflare's proxy gives up on a request that gets no response data for roughly 100 seconds and returns **HTTP 524**. With `stream: true`, data flows continuously, so this can't happen.
 
 **Sampling parameters.** `max_tokens`, `stream` and system/user messages are tested. Other parameters such as `temperature` follow LiteLLM's Ollama support. See the [LiteLLM Ollama docs](https://docs.litellm.ai/docs/providers/ollama).

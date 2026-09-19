@@ -30,7 +30,7 @@ The scripts print one of these messages and exit. Nothing is left running.
 | `Can't reach Ollama at http://localhost:11434` | Ollama isn't running. Open the Ollama app or run `ollama serve`, then retry. If Ollama runs on a different machine or port, see [configuration.md](configuration.md#ollama-on-a-different-machine-or-port). |
 | `Ollama has no models yet` | Pull one: `ollama pull llama3.2`. |
 | `LITELLM_MASTER_KEY is empty in .env` | The `LITELLM_MASTER_KEY=` line in `.env` has no value. Put a key there, or delete `.env` to have a new one generated. The scripts won't start without an API key. |
-| `LiteLLM didn't come up` | Read `logs/litellm.err.log`. Common causes: a very old or very new Python that LiteLLM doesn't support yet (3.10 to 3.14 were tested; check `python --version`), a broken install (try `pip install -U "litellm[proxy]"`), or a config file syntax error. The first start can take 10 to 30 seconds, so a slow disk or antivirus scan may need a retry. |
+| `LiteLLM didn't come up` | Read `logs/litellm.err.log`. Common causes: a very old or very new Python that LiteLLM doesn't support yet (3.10 or newer is expected; check `python --version`), a broken install (try `pip install -U "litellm[proxy]"`), or a config file syntax error. The first start can take 10 to 30 seconds, so a slow disk or antivirus scan may need a retry. |
 | `Tunnel didn't report a URL (no internet connection?)` | The quick tunnel never printed a URL within 40 seconds. Check your internet connection, then see `logs/cloudflared.err.log`. cloudflared needs outbound access to Cloudflare on port 7844. Some corporate, school and public networks block it, so try another network. |
 | `cloudflared exited before the tunnel was ready (no internet connection?)` | Quick tunnel: cloudflared stopped right after starting, most often because it couldn't reach Cloudflare. See `logs/cloudflared.err.log`. |
 | `cloudflared exited` | Named tunnel only. See `logs/cloudflared.err.log`. Usually a bad token, or a config file with wrong or placeholder values. See [tunnels.md](tunnels.md#option-b-named-cloudflare-tunnel). |
@@ -64,7 +64,7 @@ Get-ChildItem -Recurse .\homeport-main | Unblock-File
 powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1
 ```
 
-Both were tested. If your policy is fully `Restricted`, you'll instead see "running scripts is disabled on this system", and the `-ExecutionPolicy Bypass` form above fixes that too.
+If your policy is fully `Restricted`, you'll instead see "running scripts is disabled on this system", and the `-ExecutionPolicy Bypass` form above fixes that too.
 
 **macOS/Linux: "Permission denied"**
 
@@ -89,8 +89,8 @@ sed -i 's/\r$//' scripts/start.sh        # on macOS: sed -i '' 's/\r$//' scripts
 | **Works on `localhost`, fails on the public URL** | Test the layers above. Also check you used `https://` and the `/v1` path, and that the tunnel process is still running. |
 | **Public URL returns 404 with an empty body** | Quick tunnel only: cloudflared picked up your `~/.cloudflared/config.yml` and its rules overrode the quick tunnel. The scripts already prevent this. If you run cloudflared by hand, add `--config cloudflared/quick-tunnel.yml` (see [tunnels.md](tunnels.md#option-a-quick-tunnel-default)). |
 | **Public URL stopped working / "can't resolve host"** | Quick-tunnel URLs change every time you start. Use the newly printed URL. For a permanent one, see [tunnels.md](tunnels.md). |
-| **The URL was just printed but "could not resolve host" / `ERR_NAME_NOT_RESOLVED` / `getaddrinfo failed`** | The tunnel is fine, but your internet provider's DNS server hasn't learned the brand-new name yet. This was observed in testing: the name resolved instantly through Cloudflare's `1.1.1.1` and Google's `8.8.8.8` while the ISP's resolver still had no answer minutes later (other runs resolved within seconds). Wait a minute and retry (don't keep hammering it, since failed lookups can be cached), or switch your DNS to `1.1.1.1` / `8.8.8.8`, or try from another network such as your phone. |
-| **HTTP 524 or a timeout on a long request** | Cloudflare gives up on requests that return no data for about 100 seconds (reproduced in testing: a slow non-streaming request came back as 524 through a quick tunnel). Use streaming (`"stream": true`), which sends data continuously. |
+| **The URL was just printed but "could not resolve host" / `ERR_NAME_NOT_RESOLVED` / `getaddrinfo failed`** | The tunnel is fine, but your internet provider's DNS server hasn't learned the brand-new name yet. Cloudflare's `1.1.1.1` and Google's `8.8.8.8` often learn it sooner than an ISP's resolver does. Wait a minute and retry (don't keep hammering it, since failed lookups can be cached), or switch your DNS to `1.1.1.1` / `8.8.8.8`, or try from another network such as your phone. |
+| **HTTP 524 or a timeout on a long request** | Cloudflare gives up on requests that return no data for about 100 seconds and return HTTP 524. Use streaming (`"stream": true`), which sends data continuously. |
 | **Reply has empty `content`, `finish_reason` is `"length"`** | A "thinking" model spent its whole `max_tokens` budget reasoning. Raise `max_tokens` or omit it. See [using-the-api.md](using-the-api.md#good-to-know). |
 | **The first request is very slow** | Ollama is loading the model into memory (and unloads it after ~5 idle minutes by default). Later requests are faster. |
 | **Very slow responses all the time** | The model may be too big for your hardware, or running on CPU instead of GPU. That's Ollama's territory. Try a smaller model, and check Ollama's GPU documentation. |
@@ -100,7 +100,7 @@ sed -i 's/\r$//' scripts/start.sh        # on macOS: sed -i '' 's/\r$//' scripts
 
 **`UnicodeEncodeError: 'charmap' codec can't encode characters` when starting LiteLLM.** This only happens when you run `litellm` yourself with its output redirected to a file. The start scripts already handle it. Fix it for your own runs by setting `PYTHONUTF8=1` first (`$env:PYTHONUTF8 = "1"` in PowerShell).
 
-**Stopping the script.** Ctrl+C in its window stops everything. If the script's process is ended some other way (closing the window, Task Manager's "End task", `Stop-ScheduledTask`, a crash), Windows also ends LiteLLM and the tunnel, because the script puts them in a job that dies with it. This was tested with a forced `taskkill /F` of the script. If you run `litellm` yourself, though, that protection doesn't apply, and if a port stays busy you can end the whole process tree with `taskkill /PID <pid> /T /F` (`litellm.exe` starts Python as a child process, so killing only the parent isn't enough).
+**Stopping the script.** Ctrl+C in its window stops everything. If the script's process is ended some other way (closing the window, Task Manager's "End task", `Stop-ScheduledTask`, a crash), Windows also ends LiteLLM and the tunnel, because the script puts them in a job that dies with it. If you run `litellm` yourself, though, that protection doesn't apply, and if a port stays busy you can end the whole process tree with `taskkill /PID <pid> /T /F` (`litellm.exe` starts Python as a child process, so killing only the parent isn't enough).
 
 **PowerShell `curl` behaves strangely.** In Windows PowerShell 5.1, `curl` is an alias for `Invoke-WebRequest`. Use `curl.exe` explicitly, or `Invoke-RestMethod` as shown in [using-the-api.md](using-the-api.md#powershell-windows).
 

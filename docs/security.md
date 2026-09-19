@@ -37,7 +37,7 @@ If your **Cloudflare tunnel token** leaks, rotate it in the Cloudflare dashboard
 
 ## What a stranger with only your URL can see
 
-Anyone who learns the URL can load a few pages **without a key**. This was measured on LiteLLM 1.101.0, locally and through a public tunnel (the results were identical):
+Anyone who learns the URL can load a few pages **without a key**. (As of LiteLLM 1.101.0:)
 
 | Reachable without a key | What it is |
 |---|---|
@@ -47,9 +47,9 @@ Anyone who learns the URL can load a few pages **without a key**. This was measu
 | `/health/liveliness`, `/health/readiness` | "I'm alive" and `{"status":"healthy","db":"Not connected"}` |
 | `/test` | `{"route":"/test"}` |
 
-That reveals that you run LiteLLM and what its API looks like, and nothing else. **Every functional endpoint requires the key**: `/v1/*`, `/key/*`, `/model/*`, `/metrics` and the rest all reject unauthenticated requests. No keys, model names, configuration or logs are exposed, and **Ollama's own API (`/api/*`) is not reachable at all**, with or without the key (checked through the tunnel). LiteLLM has environment switches to hide its documentation pages (`NO_DOCS`, `NO_REDOC`, `DISABLE_ADMIN_UI`), but on the tested version they only removed `/redoc`, so Homeport doesn't set them: they would suggest protection that isn't there.
+That reveals that you run LiteLLM and what its API looks like, and nothing else. **Every functional endpoint requires the key**: `/v1/*`, `/key/*`, `/model/*`, `/metrics` and the rest all reject unauthenticated requests. No keys, model names, configuration or logs are exposed, and **Ollama's own API (`/api/*`) is not reachable at all**, with or without the key. LiteLLM has switches to hide its documentation pages (`NO_DOCS`, `NO_REDOC`, `DISABLE_ADMIN_UI`), but on this version they only remove `/redoc`, so Homeport doesn't set them.
 
-If you want the public surface reduced to the API alone, put a rule in front of it (for example, a Cloudflare WAF or Access rule that only lets `/v1/*` through on a named tunnel). That isn't tested here.
+If you want the public surface reduced to the API alone, put a rule in front of it (for example, a Cloudflare WAF or Access rule that only lets `/v1/*` through on a named tunnel).
 
 ## Never expose Ollama directly
 
@@ -66,7 +66,7 @@ Check your tunnel target if you change it.
 
 A `trycloudflare.com` URL is random and hard to guess, but it isn't a secret: it can show up in logs, browser history, or wherever you paste it. **The API key is what actually protects you**, not the obscurity of the URL.
 
-**Always use the `https://` form.** A quick tunnel also answers on plain `http://` and does not redirect to `https://` (checked). Anyone using the `http://` URL sends the API key across the network unencrypted.
+**Always use the `https://` form.** A quick tunnel also answers on plain `http://` and does not redirect to `https://`. Anyone using the `http://` URL sends the API key across the network unencrypted.
 
 ## Extra protection for public endpoints
 
@@ -88,9 +88,9 @@ The model runs on your hardware, so your prompts aren't sent to a model provider
 
 ## About the error codes
 
-You may notice that a request with a missing or wrong key comes back as HTTP **500** (missing key) or **400** (wrong key), not the standard 401. This was observed with LiteLLM 1.91.0 and again with 1.101.0, the newest version at the time of testing. (An older LiteLLM, 1.83.9, returns a proper 401 for a *missing* key but still 400 for a wrong one, so the codes depend on the LiteLLM version you get.)
+You may notice that a request with a missing or wrong key comes back as HTTP **500** (missing key) or **400** (wrong key), not the standard 401. The exact codes depend on your LiteLLM version (some return 401 for a missing key).
 
-**Requests are still rejected.** No model output is ever returned. This was tested with no key and with a wrong key, over both localhost and a public tunnel. The odd codes happen because LiteLLM's authentication-failure handler tries to load an optional database component (`prisma`) that isn't installed in a plain `litellm[proxy]` setup, and errors while building the response.
+**Requests are still rejected.** No model output is ever returned. The odd codes happen because LiteLLM's authentication-failure handler tries to load an optional database component (`prisma`) that isn't installed in a plain `litellm[proxy]` setup, and errors while building the response.
 
 Two practical consequences:
 
