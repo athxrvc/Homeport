@@ -1,8 +1,27 @@
+# LiteLLM gateway config: exposes every model you've pulled into Ollama
+# through an OpenAI-compatible API.
+#
+# The catch-all below means you never have to edit this file when you
+# `ollama pull` something new. Clients just use the same name `ollama list` shows
+# (e.g. "llama3.2:latest"). It routes through Ollama's /api/chat endpoint
+# (the `ollama_chat/` prefix), which LiteLLM recommends for chat models.
 model_list:
-  - model_name: gemma4
+  - model_name: "*"
     litellm_params:
-      model: ollama/your-model-name:latest
+      model: "ollama_chat/*"
       api_base: http://localhost:11434
 
-litellm_settings:
-  master_key: "replace-with-a-strong-secret"
+  # Prefer to expose only specific models (or friendly aliases)? Delete the
+  # catch-all above and list them explicitly instead:
+  #
+  # - model_name: general
+  #   litellm_params:
+  #     model: ollama_chat/llama3.2:latest
+  #     api_base: http://localhost:11434
+
+general_settings:
+  # Every request must send `Authorization: Bearer <this key>`.
+  # NOTE: this setting lives under `general_settings`. Under `litellm_settings`
+  # it is silently ignored and the API would be open to anyone.
+  # The value is read from the LITELLM_MASTER_KEY environment variable (.env).
+  master_key: os.environ/LITELLM_MASTER_KEY

@@ -1,0 +1,5 @@
+# Intentionally empty. Used by `start.* --tunnel quick`.
+#
+# cloudflared auto-loads ~/.cloudflared/config.yml if you've ever set up a named
+# tunnel. Its ingress rules then override the quick tunnel's --url and every
+# request gets a 404. Passing this empty config explicitly avoids that.
