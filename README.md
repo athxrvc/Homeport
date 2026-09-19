@@ -39,7 +39,7 @@ This repository is the glue: a ready-made LiteLLM config, tunnel configs, start 
 
 ## Quick start
 
-You need [Ollama](https://ollama.com), Python 3.10 to 3.13, and (only for a public URL) [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/). The [setup guide](SETUP.md) walks through installing each one on Windows, macOS and Linux.
+You need [Ollama](https://ollama.com), Python 3.10 or newer, and (only for a public URL) [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/). The [setup guide](SETUP.md) walks through installing each one on Windows, macOS and Linux.
 
 ```bash
 git clone https://github.com/athxrvc/homeport.git
@@ -103,6 +103,7 @@ Details for every option: [docs/tunnels.md](docs/tunnels.md).
 | [docs/security.md](docs/security.md) | Keeping a public endpoint safe; rotating your key |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | Symptoms and fixes |
 | [docs/faq.md](docs/faq.md) | Common questions |
+| [docs/testing.md](docs/testing.md) | The Windows 11 test report: what was tested, what was found, what wasn't tested |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to help |
 
 ## Security in brief
@@ -118,19 +119,20 @@ Read [docs/security.md](docs/security.md) before publishing a URL. To report a v
 
 ## What has been tested
 
-Being upfront about this is part of being a good open-source project.
+Being upfront about this is part of being a good open-source project. The full report, with every check and what was found, is in [docs/testing.md](docs/testing.md).
 
 | Area | Status |
 |---|---|
-| Windows 11, Windows PowerShell 5.1, `start.ps1`, quick tunnel | **Tested end to end**: public URL, key rejection, chat, streaming |
-| `start.sh` under Git Bash on Windows, quick tunnel | **Tested end to end** |
-| Shutdown cleanup | Verified: the scripts stop LiteLLM and the tunnel when LiteLLM exits (PowerShell) or on SIGTERM (bash). A literal Ctrl+C keypress wasn't exercised |
-| `start.sh` on native Linux and macOS | **Not yet tested.** It uses standard tools and should work; please report back |
-| Named Cloudflare tunnel (`-Tunnel named`) | Config validated; **not tested end to end** |
-| Tailscale Funnel | **Not tested** (documented from Tailscale's own docs) |
-| Autostart recipes | **Not tested** |
+| **Windows 11** (PowerShell 5.1): install from scratch, first run, local and public quick tunnel, API-key checks, chat and streaming, every error message in the troubleshooting guide, real Ctrl+C and forced-kill cleanup, `.env` edge cases, folders with spaces and accents | **Tested**: 200+ checks and a 50-minute soak through a real tunnel |
+| **Windows Scheduled Task** autostart (register, start, stop, repeat, remove) | **Tested**. An actual reboot or logon was not |
+| `start.sh` under **Git Bash on Windows** (quick tunnel, cleanup, failure handling) | **Tested** |
+| `start.sh` on **native Linux and macOS** | **Not tested.** It uses standard tools and should work. Please try it: [tests/README.md](tests/README.md) has a checklist |
+| Named Cloudflare tunnel (`-Tunnel named`) | Config validates and the script picks the right `cloudflared` arguments in all three modes. **Not brought up end to end** (needs an account and a domain) |
+| Tailscale Funnel and the private Tailscale option | **Not tested** (documented from Tailscale's own docs) |
+| Linux (systemd) and macOS (launchd) autostart | **Not tested** |
+| Windows 10, PowerShell 7 | **Not tested** |
 
-Tested with Ollama 0.30.7, LiteLLM 1.91.0 and cloudflared 2026.7.0. If you try a combination that isn't tested yet, an issue or PR saying whether it worked is a very welcome contribution.
+Tested with Ollama 0.30.7, LiteLLM 1.101.0 (a fresh `pip install`) and cloudflared 2026.7.0 on Windows 11. You can run the same API checks against your own setup with `python tests/api_tests.py --base http://localhost:4000 --key <your key> --model <model>`. If you try a combination that isn't tested yet, an issue or PR saying whether it worked is a very welcome contribution.
 
 ## Contributing
 

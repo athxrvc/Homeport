@@ -33,7 +33,23 @@ Whoever can use your gateway can use your **GPU/CPU time, electricity and model*
 3. Start it again. The old key stops working immediately.
 4. Update the key in each app that uses it.
 
-If your **Cloudflare tunnel token** leaks, rotate it in the Cloudflare dashboard (delete and recreate the tunnel's token).
+If your **Cloudflare tunnel token** leaks, rotate it in the Cloudflare dashboard (delete and recreate the tunnel's token). Note that in `named` mode with a token, the start script hands the token to `cloudflared` as a command-line argument, so other programs running as your user can see it in the process list. Don't run Homeport on a machine shared with people you don't trust. The API key, by contrast, is passed through an environment variable and is not on any command line.
+
+## What a stranger with only your URL can see
+
+Anyone who learns the URL can load a few pages **without a key**. This was measured on LiteLLM 1.101.0, locally and through a public tunnel (the results were identical):
+
+| Reachable without a key | What it is |
+|---|---|
+| `/` and `/redoc` | LiteLLM's API documentation pages |
+| `/openapi.json`, `/routes` | The list of API routes and their schemas |
+| `/ui`, `/sso/key/generate` | LiteLLM's admin login page. Homeport runs without a database, which LiteLLM's admin UI normally needs. Logging in through it was not tested |
+| `/health/liveliness`, `/health/readiness` | "I'm alive" and `{"status":"healthy","db":"Not connected"}` |
+| `/test` | `{"route":"/test"}` |
+
+That reveals that you run LiteLLM and what its API looks like, and nothing else. **Every functional endpoint requires the key**: `/v1/*`, `/key/*`, `/model/*`, `/metrics` and the rest all reject unauthenticated requests. No keys, model names, configuration or logs are exposed, and **Ollama's own API (`/api/*`) is not reachable at all**, with or without the key (checked through the tunnel). LiteLLM has environment switches to hide its documentation pages (`NO_DOCS`, `NO_REDOC`, `DISABLE_ADMIN_UI`), but on the tested version they only removed `/redoc`, so Homeport doesn't set them: they would suggest protection that isn't there.
+
+If you want the public surface reduced to the API alone, put a rule in front of it (for example, a Cloudflare WAF or Access rule that only lets `/v1/*` through on a named tunnel). That isn't tested here.
 
 ## Never expose Ollama directly
 
@@ -49,6 +65,8 @@ Check your tunnel target if you change it.
 ## Quick-tunnel URLs are not secret
 
 A `trycloudflare.com` URL is random and hard to guess, but it isn't a secret: it can show up in logs, browser history, or wherever you paste it. **The API key is what actually protects you**, not the obscurity of the URL.
+
+**Always use the `https://` form.** A quick tunnel also answers on plain `http://` and does not redirect to `https://` (checked). Anyone using the `http://` URL sends the API key across the network unencrypted.
 
 ## Extra protection for public endpoints
 
@@ -70,7 +88,7 @@ The model runs on your hardware, so your prompts aren't sent to a model provider
 
 ## About the error codes
 
-You may notice that a request with a missing or wrong key comes back as HTTP **500** (missing key) or **400** (wrong key), not the standard 401. This was observed with LiteLLM 1.91.0.
+You may notice that a request with a missing or wrong key comes back as HTTP **500** (missing key) or **400** (wrong key), not the standard 401. This was observed with LiteLLM 1.91.0 and again with 1.101.0, the newest version at the time of testing. (An older LiteLLM, 1.83.9, returns a proper 401 for a *missing* key but still 400 for a wrong one, so the codes depend on the LiteLLM version you get.)
 
 **Requests are still rejected.** No model output is ever returned. This was tested with no key and with a wrong key, over both localhost and a public tunnel. The odd codes happen because LiteLLM's authentication-failure handler tries to load an optional database component (`prisma`) that isn't installed in a plain `litellm[proxy]` setup, and errors while building the response.
 

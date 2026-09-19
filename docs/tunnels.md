@@ -36,7 +36,7 @@ This is what `start.ps1` / `start.sh` do when you don't pick anything else.
 - Cloudflare says these account-less tunnels come with no uptime guarantee, so they're meant for experiments, not for something you depend on.
 - Because the URL changes, it isn't suitable for [autostart](autostart.md).
 
-**Why the script uses an empty config file for this.** If you've ever used cloudflared before, you may have `~/.cloudflared/config.yml` (`%USERPROFILE%\.cloudflared\config.yml` on Windows). cloudflared loads it automatically, and its rules would override a quick tunnel, making every request return 404. The script passes [`cloudflared/quick-tunnel.yml`](../cloudflared/quick-tunnel.yml), an intentionally empty file, to avoid that. If you run `cloudflared tunnel --url ...` yourself and get 404s, add `--config` pointing at an empty YAML file.
+**Why the script passes its own config file for this.** If you've ever used cloudflared before, you may have `~/.cloudflared/config.yml` (`%USERPROFILE%\.cloudflared\config.yml` on Windows). cloudflared loads it automatically, and its rules would override a quick tunnel, making every request return 404. The script passes [`cloudflared/quick-tunnel.yml`](../cloudflared/quick-tunnel.yml), a config that deliberately has no ingress rules, to avoid that. If you run `cloudflared tunnel --url ...` yourself and get 404s, add `--config cloudflared/quick-tunnel.yml`.
 
 ## Option B: Named Cloudflare tunnel
 
@@ -109,7 +109,7 @@ cloudflared tunnel --config cloudflared/config.yml ingress validate
 
 Then start with `-Tunnel named` / `--tunnel named`. Leave `CLOUDFLARE_TUNNEL_TOKEN` empty in `.env`, otherwise the token takes priority.
 
-> **Status:** the named-tunnel config was validated, but the full named-tunnel flow has not been tested end to end by the maintainers. If you set it up, feedback is welcome.
+> **Status:** the shipped config template validates, and the scripts were tested to choose the right `cloudflared` arguments in all three cases (token, filled-in template, untouched template falling back to `~/.cloudflared/config.yml`) and to exit with a clear message when cloudflared fails. What the maintainers have **not** done is bring up a real named tunnel end to end (that needs a Cloudflare account and a domain). If you set one up, feedback is welcome.
 
 Optional extra protection: put [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/policies/access/) in front of the hostname so callers must also authenticate with Cloudflare. See [security.md](security.md).
 
