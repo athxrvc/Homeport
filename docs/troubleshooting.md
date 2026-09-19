@@ -81,4 +81,4 @@ sed -i 's/\r$//' scripts/start.sh        # on macOS: sed -i '' 's/\r$//' scripts
 
 ## Still stuck?
 
-Open an [issue](https://github.com/athxrvc/Local-LLM-API-Gateway/issues/new/choose) with your OS, versions and the relevant log lines. **Remove your API key, tunnel token and tunnel URL first.**
+Open an [issue](https://github.com/athxrvc/homeport/issues/new/choose) with your OS, versions and the relevant log lines. **Remove your API key, tunnel token and tunnel URL first.**

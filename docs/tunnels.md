@@ -79,8 +79,8 @@ Treat the token like a password. Anyone with it can run your tunnel.
 
 ```bash
 cloudflared tunnel login                       # opens a browser; pick your domain
-cloudflared tunnel create llm-gateway          # prints a tunnel UUID and writes a credentials .json
-cloudflared tunnel route dns llm-gateway llm.yourdomain.com
+cloudflared tunnel create homeport             # prints a tunnel UUID and writes a credentials .json
+cloudflared tunnel route dns homeport llm.yourdomain.com
 ```
 
 Then either:

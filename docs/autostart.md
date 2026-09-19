@@ -16,7 +16,7 @@ Everything works fine if you start the gateway by hand when you want it. This pa
 Run in PowerShell. Change `$repo` to where you cloned the project.
 
 ```powershell
-$repo = "C:\path\to\Local-LLM-API-Gateway"
+$repo = "C:\path\to\homeport"
 
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' `
   -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$repo\scripts\start.ps1`" -Tunnel named"
@@ -29,37 +29,37 @@ $settings = New-ScheduledTaskSettingsSet `
   -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
   -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
 
-Register-ScheduledTask -TaskName 'LocalLLMGateway' -Action $action -Trigger $trigger -Settings $settings
+Register-ScheduledTask -TaskName 'Homeport' -Action $action -Trigger $trigger -Settings $settings
 ```
 
 Try it without rebooting:
 
 ```powershell
-Start-ScheduledTask -TaskName 'LocalLLMGateway'
+Start-ScheduledTask -TaskName 'Homeport'
 Get-Content "$repo\logs\litellm.err.log" -Tail 5    # is LiteLLM up?
 ```
 
 Stop and remove it:
 
 ```powershell
-Stop-ScheduledTask -TaskName 'LocalLLMGateway'
-Unregister-ScheduledTask -TaskName 'LocalLLMGateway' -Confirm:$false
+Stop-ScheduledTask -TaskName 'Homeport'
+Unregister-ScheduledTask -TaskName 'Homeport' -Confirm:$false
 ```
 
 Because the window is hidden, the script's summary (URL, key) isn't visible. Your key is in `.env`, and your URL is the hostname you configured.
 
 ## Linux: systemd user service
 
-Create `~/.config/systemd/user/llm-gateway.service`:
+Create `~/.config/systemd/user/homeport.service`:
 
 ```ini
 [Unit]
-Description=Local LLM API Gateway
+Description=Homeport (local LLM API gateway)
 After=network-online.target
 
 [Service]
-WorkingDirectory=/path/to/Local-LLM-API-Gateway
-ExecStart=/path/to/Local-LLM-API-Gateway/scripts/start.sh --tunnel named
+WorkingDirectory=/path/to/homeport
+ExecStart=/path/to/homeport/scripts/start.sh --tunnel named
 # systemd has a minimal PATH; make sure litellm and cloudflared are on it.
 Environment=PATH=/usr/local/bin:/usr/bin:/bin:%h/.local/bin
 Restart=on-failure
@@ -73,8 +73,8 @@ Enable and start it:
 
 ```bash
 systemctl --user daemon-reload
-systemctl --user enable --now llm-gateway
-journalctl --user -u llm-gateway -f          # follow the output
+systemctl --user enable --now homeport
+journalctl --user -u homeport -f          # follow the output
 ```
 
 A user service normally stops when you log out. To keep it running without a login session:
@@ -85,21 +85,21 @@ loginctl enable-linger "$USER"
 
 ## macOS: launchd agent
 
-Create `~/Library/LaunchAgents/com.local-llm-gateway.plist` (change the paths):
+Create `~/Library/LaunchAgents/com.homeport.plist` (change the paths):
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>Label</key><string>com.local-llm-gateway</string>
+  <key>Label</key><string>com.homeport</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/path/to/Local-LLM-API-Gateway/scripts/start.sh</string>
+    <string>/path/to/homeport/scripts/start.sh</string>
     <string>--tunnel</string>
     <string>named</string>
   </array>
-  <key>WorkingDirectory</key><string>/path/to/Local-LLM-API-Gateway</string>
+  <key>WorkingDirectory</key><string>/path/to/homeport</string>
   <key>EnvironmentVariables</key>
   <dict>
     <!-- launchd has a minimal PATH; include where litellm and cloudflared live (Homebrew shown). -->
@@ -114,8 +114,8 @@ Create `~/Library/LaunchAgents/com.local-llm-gateway.plist` (change the paths):
 `launchd` does not expand `$HOME`, so write the full path to your home directory (for example `/Users/you/.local/bin`).
 
 ```bash
-launchctl load ~/Library/LaunchAgents/com.local-llm-gateway.plist
-launchctl unload ~/Library/LaunchAgents/com.local-llm-gateway.plist   # to stop
+launchctl load ~/Library/LaunchAgents/com.homeport.plist
+launchctl unload ~/Library/LaunchAgents/com.homeport.plist   # to stop
 ```
 
 ## Checking that it survived a reboot

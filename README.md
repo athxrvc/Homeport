@@ -1,10 +1,12 @@
-# Local LLM API Gateway
+# Homeport
+
+*A local LLM API gateway.*
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Run an AI model on your own computer, then use it from anywhere with a single URL.**
 
-If you have a model running in [Ollama](https://ollama.com), this project gives it an OpenAI-compatible API, protects it with an API key, and (optionally) puts it on the internet through a free Cloudflare Tunnel. Any app, script or SDK that can talk to OpenAI can talk to your own hardware instead: your phone, your laptop, a cloud server, a friend's app.
+If you have a model running in [Ollama](https://ollama.com), Homeport gives it an OpenAI-compatible API, protects it with an API key, and (optionally) puts it on the internet through a free Cloudflare Tunnel. Any app, script or SDK that can talk to OpenAI can talk to your own hardware instead: your phone, your laptop, a cloud server, a friend's app.
 
 - **Private.** Prompts are processed on your machine, not sent to a model provider. (With a public tunnel, traffic does pass through the tunnel provider's network on its way to you. Use local-only or a private Tailscale network if that matters. See [security](docs/security.md#privacy).)
 - **No per-token bill.** You pay for electricity, not API calls.
@@ -40,8 +42,8 @@ This repository is the glue: a ready-made LiteLLM config, tunnel configs, start 
 You need [Ollama](https://ollama.com), Python 3.10 to 3.13, and (only for a public URL) [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/). The [setup guide](SETUP.md) walks through installing each one on Windows, macOS and Linux.
 
 ```bash
-git clone https://github.com/athxrvc/Local-LLM-API-Gateway.git
-cd Local-LLM-API-Gateway
+git clone https://github.com/athxrvc/homeport.git
+cd homeport
 
 ollama pull llama3.2                  # or any model you like
 pip install "litellm[proxy]"

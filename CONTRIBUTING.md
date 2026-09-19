@@ -10,7 +10,7 @@ Thanks for wanting to help! This is a small project (config files, two launch sc
 
 ## Reporting bugs and asking questions
 
-Open a [GitHub issue](https://github.com/athxrvc/Local-LLM-API-Gateway/issues/new/choose). The template asks for your OS, versions and the relevant log lines. Please **remove your API key, tunnel token and tunnel URL** before pasting anything. The start script's on-screen output contains the key.
+Open a [GitHub issue](https://github.com/athxrvc/homeport/issues/new/choose). The template asks for your OS, versions and the relevant log lines. Please **remove your API key, tunnel token and tunnel URL** before pasting anything. The start script's on-screen output contains the key.
 
 For security problems, don't open a public issue. See [SECURITY.md](SECURITY.md).
 
