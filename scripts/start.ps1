@@ -82,6 +82,42 @@ $env:PYTHONUTF8 = '1'
 
 New-Item -ItemType Directory -Force -Path 'logs' | Out-Null
 $procs = @()
+$cf = $null
+
+# Put this script and everything it starts into a Windows Job Object that kills the whole tree when the
+# script's process ends for ANY reason: Stop-ScheduledTask, "End task", closing the window, a crash. The
+# finally block below only runs on a normal exit or Ctrl+C, so without this, LiteLLM and cloudflared would
+# be left running as orphans (and the public URL would stay live) whenever the PowerShell host is killed.
+try {
+  Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class HomeportJob {
+  [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern IntPtr CreateJobObject(IntPtr attrs, string name);
+  [DllImport("kernel32.dll")] static extern bool SetInformationJobObject(IntPtr job, int infoClass, IntPtr info, uint size);
+  [DllImport("kernel32.dll")] static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
+  [DllImport("kernel32.dll")] static extern IntPtr GetCurrentProcess();
+  [StructLayout(LayoutKind.Sequential)] struct Basic { public long PerProcessUserTimeLimit; public long PerJobUserTimeLimit; public uint LimitFlags; public UIntPtr MinWorkingSet; public UIntPtr MaxWorkingSet; public uint ActiveProcessLimit; public UIntPtr Affinity; public uint PriorityClass; public uint SchedulingClass; }
+  [StructLayout(LayoutKind.Sequential)] struct IoCounters { public ulong A, B, C, D, E, F; }
+  [StructLayout(LayoutKind.Sequential)] struct Extended { public Basic BasicLimits; public IoCounters Io; public UIntPtr ProcessMemoryLimit; public UIntPtr JobMemoryLimit; public UIntPtr PeakProcessMemory; public UIntPtr PeakJobMemory; }
+  static IntPtr job;  // held for the life of the process; when it exits, Windows closes this handle and kills the job
+  public static bool Enable() {
+    job = CreateJobObject(IntPtr.Zero, null);
+    if (job == IntPtr.Zero) return false;
+    Extended info = new Extended();
+    info.BasicLimits.LimitFlags = 0x2000;  // JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+    int size = Marshal.SizeOf(typeof(Extended));
+    IntPtr buf = Marshal.AllocHGlobal(size);
+    try {
+      Marshal.StructureToPtr(info, buf, false);
+      if (!SetInformationJobObject(job, 9, buf, (uint)size)) return false;  // 9 = JobObjectExtendedLimitInformation
+    } finally { Marshal.FreeHGlobal(buf); }
+    return AssignProcessToJobObject(job, GetCurrentProcess());
+  }
+}
+'@
+  [void][HomeportJob]::Enable()
+} catch { }  # best effort: the finally block below still cleans up on a normal exit or Ctrl+C
 
 function Stop-All {
   foreach ($p in $script:procs) {
@@ -121,9 +157,12 @@ try {
       if ($cf.HasExited) { break }
       Start-Sleep -Seconds 1
       $text = (Get-Content 'logs/cloudflared.err.log' -Raw -ErrorAction SilentlyContinue) + (Get-Content 'logs/cloudflared.out.log' -Raw -ErrorAction SilentlyContinue)
-      if ($text -match 'https://[a-z0-9-]+\.trycloudflare\.com') { $publicUrl = $Matches[0] }
+      # Skip api.trycloudflare.com: when cloudflared can't reach the internet it prints Cloudflare's API address in its
+      # error message, and that must never be mistaken for the tunnel's public URL.
+      if ($text -match 'https://(?!api\.)[a-z0-9-]+\.trycloudflare\.com') { $publicUrl = $Matches[0] }
     }
-    if (-not $publicUrl) { Fail "Tunnel didn't report a URL. See logs/cloudflared.err.log" }
+    if ($cf.HasExited) { Fail "cloudflared exited before the tunnel was ready (no internet connection?). See logs/cloudflared.err.log" }
+    if (-not $publicUrl) { Fail "Tunnel didn't report a URL (no internet connection?). See logs/cloudflared.err.log" }
   }
   elseif ($Tunnel -eq 'named') {
     Write-Host "Starting named tunnel ..."
@@ -163,8 +202,15 @@ try {
   if ($Tunnel -eq 'quick') { Write-Host "Quick-tunnel URLs change every run; use -Tunnel named for a permanent one." -ForegroundColor DarkGray }
   Write-Host "Press Ctrl+C to stop." -ForegroundColor DarkGray
 
-  while (-not $lite.HasExited) { Start-Sleep -Seconds 2 }
+  while (-not $lite.HasExited) {
+    if ($cf -and $cf.HasExited) {
+      Write-Host "The tunnel (cloudflared) stopped, so the public URL no longer works. See logs/cloudflared.err.log. Stopping; start the script again for a new URL." -ForegroundColor Red
+      exit 1
+    }
+    Start-Sleep -Seconds 2
+  }
   Write-Host "LiteLLM exited. See logs/litellm.err.log" -ForegroundColor Red
+  exit 1
 }
 finally {
   Stop-All

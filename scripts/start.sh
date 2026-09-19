@@ -82,11 +82,14 @@ if [ "$TUNNEL" = quick ]; then
   CF_PID=$!; PIDS+=("$CF_PID")
   for _ in $(seq 1 40); do
     kill -0 "$CF_PID" 2>/dev/null || break
-    PUBLIC_URL_OUT="$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' logs/cloudflared.log | head -n1 || true)"
+    # Skip api.trycloudflare.com: when cloudflared can't reach the internet it prints Cloudflare's API address in its
+    # error message, and that must never be mistaken for the tunnel's public URL.
+    PUBLIC_URL_OUT="$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' logs/cloudflared.log | grep -v '^https://api\.' | head -n1 || true)"
     [ -n "$PUBLIC_URL_OUT" ] && break
     sleep 1
   done
-  [ -n "$PUBLIC_URL_OUT" ] || fail "Tunnel didn't report a URL. See logs/cloudflared.log"
+  kill -0 "$CF_PID" 2>/dev/null || fail "cloudflared exited before the tunnel was ready (no internet connection?). See logs/cloudflared.log"
+  [ -n "$PUBLIC_URL_OUT" ] || fail "Tunnel didn't report a URL (no internet connection?). See logs/cloudflared.log"
 elif [ "$TUNNEL" = named ]; then
   echo "Starting named tunnel ..."
   if [ -n "${CLOUDFLARE_TUNNEL_TOKEN:-}" ]; then
@@ -126,5 +129,13 @@ echo "Any OpenAI SDK: base_url = $BASE/v1 , api_key = <key above> , model = $EXA
 [ "$TUNNEL" != quick ] || echo "Quick-tunnel URLs change every run; use --tunnel named for a permanent one."
 echo "Press Ctrl+C to stop."
 
-wait "$LITE_PID" || true
+CF_PID="${CF_PID:-}"
+while kill -0 "$LITE_PID" 2>/dev/null; do
+  if [ -n "$CF_PID" ] && ! kill -0 "$CF_PID" 2>/dev/null; then
+    echo "The tunnel (cloudflared) stopped, so the public URL no longer works. See logs/cloudflared.log. Stopping; start the script again for a new URL." >&2
+    exit 1
+  fi
+  sleep 2
+done
 echo "LiteLLM exited. See logs/litellm.log" >&2
+exit 1
