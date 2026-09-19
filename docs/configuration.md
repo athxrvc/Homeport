@@ -9,7 +9,7 @@ Almost everything works with no configuration. This page covers what you *can* c
 | [`.env`](../.env.example) | Your secrets: API key, optional tunnel token. **Git-ignored.** | Yes, it's yours |
 | [`LiteLLM/config.yaml`](../LiteLLM/config.yaml) | Which models are exposed and how requests are authenticated | To pin models or add aliases |
 | [`cloudflared/config.yml`](../cloudflared/config.yml) | Template for a named tunnel (config-file method) | Only for a named tunnel |
-| [`cloudflared/quick-tunnel.yml`](../cloudflared/quick-tunnel.yml) | Intentionally empty; used for quick tunnels | No |
+| [`cloudflared/quick-tunnel.yml`](../cloudflared/quick-tunnel.yml) | Deliberately has no ingress rules; used for quick tunnels | No |
 | [`scripts/start.ps1`](../scripts/start.ps1), [`start.sh`](../scripts/start.sh) | One-command launchers | Rarely |
 
 ## `.env` settings
@@ -99,12 +99,12 @@ model_list:
 Restart the gateway after editing. Then:
 
 - Clients use `general` or `coder` as the model name.
-- `GET /v1/models` lists exactly `general` and `coder`, so dropdown-based apps work. (A single alias was tested this way.)
+- `GET /v1/models` lists exactly `general` and `coder`, so dropdown-based apps work. (Tested with two aliases.)
 - Only the models you list are reachable.
 
 The benefit of aliases: you can swap the underlying model later (change `llama3.2` to something newer) without touching any client.
 
-> Keeping aliases *and* the catch-all together has not been tested. Check `/v1/models` and a real request if you try it.
+Keeping aliases *and* the catch-all together also works (tested): the aliases answer, and any other model name is still passed straight through to Ollama. `/v1/models` then lists your aliases plus the made-up `ollama_chat/llama2` entry described in [using-the-api.md](using-the-api.md#the-model-list-shows-odd-entries).
 
 ## Ollama on a different machine or port
 

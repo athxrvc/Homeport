@@ -2,7 +2,7 @@
 
 Everything works fine if you start the gateway by hand when you want it. This page is for when you want the URL to be **always available whenever your computer is on**, without you doing anything.
 
-> **Status: untested recipes.** The scripts themselves are tested (see the [README](../README.md#what-has-been-tested)). The autostart snippets below use standard OS mechanisms but have **not** been run end to end by the maintainers. If you use one, please open an issue or PR with what worked or didn't.
+> **Status.** The **Windows Scheduled Task** recipe was tested on Windows 11 as a normal (non-admin) user: it registers, starts, serves requests, stops completely (LiteLLM and the tunnel both end), can be started again, and unregisters cleanly (see the [test report](testing.md)). What was *not* exercised is an actual reboot and the logon trigger firing on its own. The **Linux systemd** and **macOS launchd** recipes below use standard OS mechanisms but have **not** been run by the maintainers. If you use one, please open an issue or PR with what worked or didn't.
 
 ## Before you set this up
 
@@ -21,7 +21,9 @@ $repo = "C:\path\to\homeport"
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' `
   -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$repo\scripts\start.ps1`" -Tunnel named"
 
-$trigger = New-ScheduledTaskTrigger -AtLogOn
+# -User matters: without it the trigger means "any user logs on", which needs administrator
+# rights and fails with "Access is denied" in a normal PowerShell window.
+$trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
 
 # Windows' defaults would stop the task after 72 hours and when on battery power.
 $settings = New-ScheduledTaskSettingsSet `
@@ -45,6 +47,8 @@ Stop and remove it:
 Stop-ScheduledTask -TaskName 'Homeport'
 Unregister-ScheduledTask -TaskName 'Homeport' -Confirm:$false
 ```
+
+`Stop-ScheduledTask` ends the whole gateway: the script places LiteLLM and the tunnel in a Windows job that is closed when the script's process ends, so nothing is left running afterwards. (This was tested.)
 
 Because the window is hidden, the script's summary (URL, key) isn't visible. Your key is in `.env`, and your URL is the hostname you configured.
 

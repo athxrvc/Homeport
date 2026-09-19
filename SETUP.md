@@ -26,10 +26,10 @@ your app --> [Cloudflare Tunnel] --> LiteLLM (:4000) --> Ollama (:11434) --> mod
 
 | Requirement | Notes |
 |---|---|
-| A computer that can run a model | Windows 10/11, macOS or Linux. Smaller models (1 to 4 billion parameters) run on almost anything. 7 to 8B models want roughly 8 GB of RAM or GPU memory; larger models want more. |
+| A computer that can run a model | Windows 11 (tested), or Windows 10, macOS and Linux (should work, not tested yet). Smaller models (1 to 4 billion parameters) run on almost anything. 7 to 8B models want roughly 8 GB of RAM or GPU memory; larger models want more. |
 | [Ollama](https://ollama.com) | Runs the model. |
-| Python **3.10 to 3.13** and pip | For LiteLLM. Check with `python --version`. |
-| [git](https://git-scm.com) | To clone this repo (or download the ZIP from GitHub instead). |
+| Python **3.10 or newer** and pip | For LiteLLM. Check with `python --version`. Tested on 3.10, 3.12, 3.13 and 3.14. (3.9 also worked, but pip installs an older LiteLLM there, 1.83.9.) |
+| [git](https://git-scm.com) | To clone this repo. (You can download the ZIP from GitHub instead, but on Windows that needs one extra step: see ["is not digitally signed"](docs/troubleshooting.md#launching-the-script).) |
 | [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) | **Only** for a public URL. Skip it for local-only use. |
 | A Cloudflare account and domain | **Only** for a permanent URL. The default quick tunnel needs neither. |
 
@@ -146,7 +146,7 @@ macOS / Linux:
 > **PowerShell says scripts are disabled?** Run it as `powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1 -Tunnel none`.
 > **macOS/Linux says permission denied?** Run `chmod +x scripts/start.sh` once.
 
-The first time, it creates a `.env` file with a randomly generated API key. After LiteLLM starts (the first launch can take 10 to 30 seconds), you'll see something like:
+The first time, it creates a `.env` file with a randomly generated API key. After LiteLLM starts (typically 7 to 10 seconds; the very first launch after installing can take longer), you'll see something like:
 
 ```text
 Gateway is up.
@@ -200,7 +200,9 @@ macOS / Linux:
 ./scripts/start.sh
 ```
 
-After a few seconds you'll see a **Public URL** like `https://some-random-words.trycloudflare.com/v1`. That's it. Anyone who has that URL **and your API key** can use your model while this window stays open.
+After 10 to 20 seconds you'll see a **Public URL** like `https://some-random-words.trycloudflare.com/v1`. That's it. Anyone who has that URL **and your API key** can use your model while this window stays open.
+
+> **The URL was printed but "can't resolve host"?** Brand-new tunnel names can take a little while to reach your internet provider's DNS (a few seconds usually, occasionally minutes). The tunnel is fine. Wait a minute and try again, or see [the troubleshooting entry](docs/troubleshooting.md#requests-fail).
 
 Test it from another device (your phone on mobile data is a great check that it's truly reachable from anywhere) using the same request as above, with the public URL in place of `http://localhost:4000`.
 

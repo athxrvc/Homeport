@@ -74,9 +74,13 @@ reply = client.chat.completions.create(
 print(reply.choices[0].message.content)
 ```
 
-**Streaming:**
+**Streaming** (this block is complete on its own, so you can copy it as it is):
 
 ```python
+from openai import OpenAI
+
+client = OpenAI(base_url="https://<your-url>/v1", api_key="<your key>")
+
 stream = client.chat.completions.create(
     model="llama3.2:latest",
     messages=[{"role": "user", "content": "Tell me a short story."}],
@@ -135,7 +139,7 @@ Most software that supports "OpenAI-compatible" or "custom OpenAI endpoint" prov
 Things that trip people up:
 
 - **Cloud-hosted apps can't reach `localhost`.** If the app runs on someone else's servers, `http://localhost:4000` means *their* machine. Use your public URL. Apps that run on your own computer can use either.
-- **Use the `https://` public URL for anything outside your machine.** The tunnel provides HTTPS. Plain `http://localhost:4000` is for same-machine use.
+- **Always use the `https://` public URL for anything outside your machine.** Plain `http://localhost:4000` is for same-machine use only. A quick tunnel also answers on plain `http://` (it does *not* redirect to https), so an app configured with an `http://` tunnel URL would send your API key unencrypted. Check that the base URL starts with `https://`.
 - **Some apps ask you to choose the model from a list.** See the next section.
 - **Test with curl or the Python snippet first.** If those work and the app doesn't, the problem is the app's settings, not the gateway.
 
@@ -143,7 +147,7 @@ This project doesn't ship instructions for specific third-party apps, because th
 
 ### The model list shows odd entries
 
-Apps that fill a dropdown from `GET /v1/models` will see entries such as `*` and `ollama_chat/llama2` instead of your real models. That is a side effect of the default catch-all config, which lets every model work without listing them one by one. **Chat requests still work**: you can type your model name into the app manually.
+Apps that fill a dropdown from `GET /v1/models` will see a made-up `ollama_chat/llama2` entry (older LiteLLM versions also showed `*`) instead of your real models. That is a side effect of the default catch-all config, which lets every model work without listing them one by one. **Chat requests still work**: you can type your model name into the app manually. Don't pick `ollama_chat/llama2` from the list unless you really have that model.
 
 If you want a proper dropdown, list your models explicitly in the config. `/v1/models` then shows exactly what you list (this was tested):
 
@@ -162,8 +166,8 @@ Clients then use `general` as the model name. See [configuration.md](configurati
 
 **The first request is slow.** Ollama loads the model into memory on first use, and unloads it after a period of inactivity (5 minutes by default; the `OLLAMA_KEEP_ALIVE` environment variable changes this). After a quiet spell, expect the next request to take longer.
 
-**"Thinking" models.** Some models reason before answering and return that in a separate `reasoning_content` field. If `max_tokens` is small, the model can use it all up thinking and return an empty `content` with `finish_reason: "length"`. Raise `max_tokens` or leave it out.
+**"Thinking" models.** Some models reason before answering and return that in a separate `reasoning_content` field. If `max_tokens` is small, the model can use it all up thinking and return an empty `content` with `finish_reason: "length"`. Raise `max_tokens` or leave it out. Reasoning models can also be slow: the one used for testing spent about a minute (roughly 15,000 tokens) thinking about a five-word greeting when no limit was set. For quick tasks, set `max_tokens` or use a non-reasoning model.
 
-**Use streaming for long answers.** Streaming through the tunnel was tested and delivers tokens progressively, as it does locally. It also matters for a second reason: Cloudflare documents that its proxy can drop a request that gets no response data for roughly 100 seconds (a 524 error). We didn't manage to trigger this in testing (our longest non-streaming request took 49 seconds), but a very long non-streaming generation could hit it. With `stream: true`, data flows continuously and this can't happen.
+**Use streaming for long answers.** Streaming through the tunnel was tested and delivers tokens progressively, as it does locally. It also matters for a second reason, which was reproduced in testing: Cloudflare's proxy gives up on a request that gets no response data for roughly 100 seconds. A non-streaming request that ran past that limit through a quick tunnel came back as **HTTP 524**, while shorter ones on the same tunnel succeeded. With `stream: true`, data flows continuously and this can't happen.
 
 **Sampling parameters.** `max_tokens`, `stream` and system/user messages are tested. Other parameters such as `temperature` follow LiteLLM's Ollama support. See the [LiteLLM Ollama docs](https://docs.litellm.ai/docs/providers/ollama).
