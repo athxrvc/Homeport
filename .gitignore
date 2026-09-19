@@ -1,0 +1,8 @@
+# Secrets
+.env
+cloudflared/*.json
+cloudflared/cert.pem
+
+# Runtime output from scripts/start.*
+logs/
+*.log

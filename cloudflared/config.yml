@@ -1,0 +1,14 @@
+# Template for a *named* Cloudflare Tunnel (stable URL on a domain you own).
+# Not needed for the default quick tunnel. See SETUP.md, "Option B".
+#
+# Copy the values from `cloudflared tunnel create <name>`.
+tunnel: <TUNNEL-UUID>
+credentials-file: C:\Users\<username>\.cloudflared\<TUNNEL-UUID>.json
+
+ingress:
+  # Bare hostname only, no "https://". The scheme goes on `service`.
+  - hostname: llm.example.com
+    service: http://localhost:4000
+
+  # Required catch-all: anything else gets a 404.
+  - service: http_status:404
