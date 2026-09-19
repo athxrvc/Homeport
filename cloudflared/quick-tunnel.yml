@@ -1,5 +1,9 @@
-# Intentionally empty. Used by `start.* --tunnel quick`.
+# Used by `start.* --tunnel quick`. Deliberately has no ingress rules.
 #
 # cloudflared auto-loads ~/.cloudflared/config.yml if you've ever set up a named
 # tunnel. Its ingress rules then override the quick tunnel's --url and every
-# request gets a 404. Passing this empty config explicitly avoids that.
+# request gets a 404. Passing this config explicitly avoids that.
+#
+# The one setting below is only here so the file isn't empty: cloudflared logs a
+# scary-looking "ERR Configuration file ... was empty" line for an empty config.
+no-autoupdate: true
