@@ -123,8 +123,8 @@ cloudflared --version
 ## 5. Get the project
 
 ```bash
-git clone https://github.com/athxrvc/Local-LLM-API-Gateway.git
-cd Local-LLM-API-Gateway
+git clone https://github.com/athxrvc/homeport.git
+cd homeport
 ```
 
 ## 6. First run: local only

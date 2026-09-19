@@ -21,5 +21,6 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - Windows: probing `localhost` stalled for about 2 seconds per attempt (IPv6 fallback); the scripts use `127.0.0.1`.
 
 ### Changed
+- Project renamed from "Local LLM API Gateway" to **Homeport**. Repository, clone and issue links, and the service, task and launch-agent names in the autostart guide were updated to match.
 - LiteLLM now listens on `127.0.0.1` by default instead of all interfaces.
 - Documented Python requirement corrected to 3.10 to 3.13 (LiteLLM's requirement).
