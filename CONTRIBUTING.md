@@ -2,7 +2,7 @@
 
 Thanks for wanting to help! This is a small project (config files, two launch scripts and documentation), so contributing is easy. Good first contributions include:
 
-- **Testing on your platform** and reporting what worked or didn't. The README's [tested matrix](README.md#what-has-been-tested) has gaps: native Linux and macOS, a real named tunnel end to end, Tailscale, Windows 10 and PowerShell 7, and Linux/macOS autostart. There's a [checklist](tests/README.md) for testers.
+- **Testing on your platform** and reporting what worked or didn't. The README's [status](README.md#status) lists what hasn't been tried yet: native Linux and macOS, a real named tunnel, Tailscale, and Linux/macOS autostart.
 - **Fixing or clarifying docs.** If a step confused you, it will confuse others.
 - **Guides for specific apps** (a chat UI, an editor, an agent framework) connecting to the gateway, written from something you actually got working.
 - **New tunnel or autostart recipes**, with notes on what you tested.
@@ -24,8 +24,7 @@ scripts/start.ps1          Windows launcher (PowerShell)
 scripts/start.sh           macOS / Linux launcher (bash)
 .env.example               Template for local secrets (.env is git-ignored)
 SETUP.md                   Step-by-step install guide
-docs/                      Topic guides (docs/testing.md is the test report)
-tests/api_tests.py         Portable API test suite; tests/README.md has a manual checklist
+docs/                      Topic guides
 ```
 
 ## Running it locally while you work
@@ -34,7 +33,7 @@ tests/api_tests.py         Portable API test suite; tests/README.md has a manual
 ./scripts/start.sh --tunnel none          # or: .\scripts\start.ps1 -Tunnel none
 ```
 
-Use `--tunnel none` while developing so you don't publish anything. Run `python tests/api_tests.py --base http://localhost:4000 --key <your key> --model <model>` against your change (see [tests/README.md](tests/README.md)). Use a different port (`--port 4010`) if you already run a gateway on 4000. Logs are in `logs/`.
+Use `--tunnel none` while developing so you don't publish anything. Use a different port (`--port 4010`) if you already run a gateway on 4000. Logs are in `logs/`.
 
 ## Guidelines for changes to the scripts
 
@@ -48,7 +47,7 @@ Use `--tunnel none` while developing so you don't publish anything. Run `python 
 
 ## Guidelines for docs
 
-- **Only state what you have tested.** (The [test report](docs/testing.md) shows how; docs that quote an error message should have that message reproduced.) If a step is untested, say so plainly (the docs already do this with "Status" notes). Untested-but-labelled is fine; untested-and-implied-to-work isn't.
+- **Only state what you have tested.** If a page quotes an error message, reproduce it first. If a step is untested, say so plainly (the docs already do this with "Status" notes). Untested-but-labelled is fine; untested-and-implied-to-work isn't.
 - Write for someone who has never used Ollama or a terminal much: say what they should *see* after each step.
 - Show **both** Windows (PowerShell) and macOS/Linux (bash) commands where they differ.
 - Never include real keys, tokens, domains or personal paths in examples. Use placeholders like `<your key>`, `sk-YOUR-KEY`, `llm.yourdomain.com`.

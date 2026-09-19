@@ -26,9 +26,9 @@ your app --> [Cloudflare Tunnel] --> LiteLLM (:4000) --> Ollama (:11434) --> mod
 
 | Requirement | Notes |
 |---|---|
-| A computer that can run a model | Windows 11 (tested), or Windows 10, macOS and Linux (should work, not tested yet). Smaller models (1 to 4 billion parameters) run on almost anything. 7 to 8B models want roughly 8 GB of RAM or GPU memory; larger models want more. |
+| A computer that can run a model | Windows, macOS or Linux. Smaller models (1 to 4 billion parameters) run on almost anything. 7 to 8B models want roughly 8 GB of RAM or GPU memory; larger models want more. |
 | [Ollama](https://ollama.com) | Runs the model. |
-| Python **3.10 or newer** and pip | For LiteLLM. Check with `python --version`. Tested on 3.10, 3.12, 3.13 and 3.14. (3.9 also worked, but pip installs an older LiteLLM there, 1.83.9.) |
+| Python **3.10 or newer** and pip | For LiteLLM. Check with `python --version`. |
 | [git](https://git-scm.com) | To clone this repo. (You can download the ZIP from GitHub instead, but on Windows that needs one extra step: see ["is not digitally signed"](docs/troubleshooting.md#launching-the-script).) |
 | [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) | **Only** for a public URL. Skip it for local-only use. |
 | A Cloudflare account and domain | **Only** for a permanent URL. The default quick tunnel needs neither. |

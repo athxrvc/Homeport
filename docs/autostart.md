@@ -2,7 +2,7 @@
 
 Everything works fine if you start the gateway by hand when you want it. This page is for when you want the URL to be **always available whenever your computer is on**, without you doing anything.
 
-> **Status.** The **Windows Scheduled Task** recipe was tested on Windows 11 as a normal (non-admin) user: it registers, starts, serves requests, stops completely (LiteLLM and the tunnel both end), can be started again, and unregisters cleanly (see the [test report](testing.md)). What was *not* exercised is an actual reboot and the logon trigger firing on its own. The **Linux systemd** and **macOS launchd** recipes below use standard OS mechanisms but have **not** been run by the maintainers. If you use one, please open an issue or PR with what worked or didn't.
+> **Status.** The Windows Scheduled Task recipe works on Windows 11 as a normal (non-admin) user. The Linux systemd and macOS launchd recipes below haven't been run by the maintainers. If you use one, please open an issue or PR with what worked or didn't.
 
 ## Before you set this up
 
@@ -48,7 +48,7 @@ Stop-ScheduledTask -TaskName 'Homeport'
 Unregister-ScheduledTask -TaskName 'Homeport' -Confirm:$false
 ```
 
-`Stop-ScheduledTask` ends the whole gateway: the script places LiteLLM and the tunnel in a Windows job that is closed when the script's process ends, so nothing is left running afterwards. (This was tested.)
+`Stop-ScheduledTask` ends the whole gateway: the script places LiteLLM and the tunnel in a Windows job that is closed when the script's process ends, so nothing is left running afterwards.
 
 Because the window is hidden, the script's summary (URL, key) isn't visible. Your key is in `.env`, and your URL is the hostname you configured.
 

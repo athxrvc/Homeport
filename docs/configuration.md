@@ -99,12 +99,12 @@ model_list:
 Restart the gateway after editing. Then:
 
 - Clients use `general` or `coder` as the model name.
-- `GET /v1/models` lists exactly `general` and `coder`, so dropdown-based apps work. (Tested with two aliases.)
+- `GET /v1/models` lists exactly `general` and `coder`, so dropdown-based apps work.
 - Only the models you list are reachable.
 
 The benefit of aliases: you can swap the underlying model later (change `llama3.2` to something newer) without touching any client.
 
-Keeping aliases *and* the catch-all together also works (tested): the aliases answer, and any other model name is still passed straight through to Ollama. `/v1/models` then lists your aliases plus the made-up `ollama_chat/llama2` entry described in [using-the-api.md](using-the-api.md#the-model-list-shows-odd-entries).
+Keeping aliases *and* the catch-all together also works: the aliases answer, and any other model name is still passed straight through to Ollama. `/v1/models` then lists your aliases plus the made-up `ollama_chat/llama2` entry described in [using-the-api.md](using-the-api.md#the-model-list-shows-odd-entries).
 
 ## Ollama on a different machine or port
 

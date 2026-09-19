@@ -103,7 +103,6 @@ Details for every option: [docs/tunnels.md](docs/tunnels.md).
 | [docs/security.md](docs/security.md) | Keeping a public endpoint safe; rotating your key |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | Symptoms and fixes |
 | [docs/faq.md](docs/faq.md) | Common questions |
-| [docs/testing.md](docs/testing.md) | The Windows 11 test report: what was tested, what was found, what wasn't tested |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to help |
 
 ## Security in brief
@@ -117,22 +116,9 @@ A public URL that reaches your GPU deserves care.
 
 Read [docs/security.md](docs/security.md) before publishing a URL. To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
-## What has been tested
+## Status
 
-Being upfront about this is part of being a good open-source project. The full report, with every check and what was found, is in [docs/testing.md](docs/testing.md).
-
-| Area | Status |
-|---|---|
-| **Windows 11** (PowerShell 5.1): install from scratch, first run, local and public quick tunnel, API-key checks, chat and streaming, every error message in the troubleshooting guide, real Ctrl+C and forced-kill cleanup, `.env` edge cases, folders with spaces and accents | **Tested**: 200+ checks and a 50-minute soak through a real tunnel |
-| **Windows Scheduled Task** autostart (register, start, stop, repeat, remove) | **Tested**. An actual reboot or logon was not |
-| `start.sh` under **Git Bash on Windows** (quick tunnel, cleanup, failure handling) | **Tested** |
-| `start.sh` on **native Linux and macOS** | **Not tested.** It uses standard tools and should work. Please try it: [tests/README.md](tests/README.md) has a checklist |
-| Named Cloudflare tunnel (`-Tunnel named`) | Config validates and the script picks the right `cloudflared` arguments in all three modes. **Not brought up end to end** (needs an account and a domain) |
-| Tailscale Funnel and the private Tailscale option | **Not tested** (documented from Tailscale's own docs) |
-| Linux (systemd) and macOS (launchd) autostart | **Not tested** |
-| Windows 10, PowerShell 7 | **Not tested** |
-
-Tested with Ollama 0.30.7, LiteLLM 1.101.0 (a fresh `pip install`) and cloudflared 2026.7.0 on Windows 11. You can run the same API checks against your own setup with `python tests/api_tests.py --base http://localhost:4000 --key <your key> --model <model>`. If you try a combination that isn't tested yet, an issue or PR saying whether it worked is a very welcome contribution.
+Homeport has been run on **Windows 11** (PowerShell and Git Bash) with Ollama 0.30.7, LiteLLM 1.101.0 and cloudflared 2026.7.0. It hasn't been tried yet on native Linux or macOS, with a real named Cloudflare tunnel, or with Tailscale, so those paths are documented but unverified. If you try one, an issue saying how it went is a welcome contribution.
 
 ## Contributing
 

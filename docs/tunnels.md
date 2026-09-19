@@ -109,7 +109,7 @@ cloudflared tunnel --config cloudflared/config.yml ingress validate
 
 Then start with `-Tunnel named` / `--tunnel named`. Leave `CLOUDFLARE_TUNNEL_TOKEN` empty in `.env`, otherwise the token takes priority.
 
-> **Status:** the shipped config template validates, and the scripts were tested to choose the right `cloudflared` arguments in all three cases (token, filled-in template, untouched template falling back to `~/.cloudflared/config.yml`) and to exit with a clear message when cloudflared fails. What the maintainers have **not** done is bring up a real named tunnel end to end (that needs a Cloudflare account and a domain). If you set one up, feedback is welcome.
+> **Status:** the config template validates and the scripts choose the right `cloudflared` arguments for each case, but the maintainers haven't brought up a real named tunnel end to end (that needs a Cloudflare account and a domain). Feedback is welcome.
 
 Optional extra protection: put [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/policies/access/) in front of the hostname so callers must also authenticate with Cloudflare. See [security.md](security.md).
 
@@ -166,4 +166,3 @@ Whatever you use, **only ever forward port 4000 (LiteLLM), never Ollama's port 1
 | Account needed | No | Cloudflare | Tailscale |
 | URL stable | No | Yes | Yes |
 | Good for autostart | No | Yes | Yes |
-| Tested here | Yes | Config only | No |
