@@ -49,18 +49,19 @@ if [ -z "$PY" ]; then
     # No Homebrew and no installer that asks for a password: use uv (from astral.sh) to download a private
     # copy of Python 3.12 into .tools. uv's installer is told not to touch PATH or your shell profile.
     echo "No Python 3.10+ found. Downloading a private Python 3.12 into .tools (via uv, from astral.sh) ..."
+    # Keep everything uv does inside .tools: its Python, and its download cache (otherwise ~/.cache/uv).
     export UV_PYTHON_INSTALL_DIR="$TOOLS/python"
-    if have uv; then
-      UVBIN="$(command -v uv)"
-    else
+    export UV_CACHE_DIR="$TOOLS/cache"
+    # Always use our own copy of uv, so the version doesn't depend on whatever the user may have installed.
+    UVBIN="$TOOLS/uv"
+    if [ ! -x "$UVBIN" ]; then
       mkdir -p "$TOOLS"
       curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="$TOOLS" UV_NO_MODIFY_PATH=1 sh \
         || fail "Couldn't download uv from astral.sh. Check your internet connection, or install Python 3.10+ yourself (https://www.python.org/downloads/) and run this again."
-      UVBIN="$TOOLS/uv"
-      [ -x "$UVBIN" ] || UVBIN="$TOOLS/bin/uv"
       [ -x "$UVBIN" ] || fail "uv was downloaded but couldn't be found in $TOOLS."
     fi
-    "$UVBIN" python install 3.12 \
+    # --no-bin: don't also link python3.12 into ~/.local/bin (that would put a file outside the project).
+    "$UVBIN" python install --no-bin 3.12 \
       || fail "Couldn't download Python 3.12. Check your internet connection, or install Python 3.10+ yourself (https://www.python.org/downloads/) and run this again."
     PY="$("$UVBIN" python find 3.12)"
   else
@@ -76,8 +77,15 @@ if [ -x "$VENV/bin/python" ] && ! py_ok "$VENV/bin/python"; then
   rm -rf "$VENV"
 fi
 if [ ! -x "$VENV/bin/python" ]; then
-  "$PY" -m venv "$VENV" \
-    || fail "Couldn't create a virtual environment. On Debian/Ubuntu: sudo apt install python3-venv"
+  rm -rf "$VENV"   # a leftover or broken .venv (for example one whose Python was removed)
+  if [ -n "${UVBIN:-}" ]; then
+    # The Python came from uv, so create the environment with uv too. --seed installs pip into it.
+    "$UVBIN" venv --python "$PY" --seed "$VENV" \
+      || fail "Couldn't create a virtual environment with uv."
+  else
+    "$PY" -m venv "$VENV" \
+      || fail "Couldn't create a virtual environment. On Debian/Ubuntu: sudo apt install python3-venv"
+  fi
 fi
 "$VENV/bin/python" -m pip install --quiet --upgrade pip
 "$VENV/bin/python" -m pip install --quiet --upgrade "litellm[proxy]"
