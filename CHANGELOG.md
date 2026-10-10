@@ -14,6 +14,8 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - `CONTRIBUTING.md`, `SECURITY.md`, issue and pull request templates.
 
 ### Fixed
+- Docs: the macOS launchd recipe now covers what a real Mac run found: create `~/Library/LaunchAgents` first, keep the project out of Documents/Desktop/Downloads (macOS blocks background jobs from reading them), and use `launchctl bootstrap`/`bootout`.
+- Docs: how to stop leftover LiteLLM and cloudflared processes after `kill -9` on macOS/Linux; `chmod 600 .env` for an existing `.env`; a warning that redirected script output contains the API key; and a more realistic wait for a new tunnel name to resolve (a minute or two).
 - `start.sh` now creates `.env` readable only by your own user account (it was world-readable), since it holds the API key.
 - `start.sh --help` and `install.sh --help` printed a stray `set -euo pipefail` line.
 - `install.sh` skipped a Homebrew Python 3.14 and installed Python 3.12 when it didn't need to.

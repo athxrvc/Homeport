@@ -206,7 +206,7 @@ macOS / Linux:
 
 After 10 to 20 seconds you'll see a **Public URL** like `https://some-random-words.trycloudflare.com/v1`. That's it. Anyone who has that URL **and your API key** can use your model while this window stays open.
 
-> **The URL was printed but "can't resolve host"?** Brand-new tunnel names can take a little while to reach your internet provider's DNS (a few seconds usually, occasionally minutes). The tunnel is fine. Wait a minute and try again, or see [the troubleshooting entry](docs/troubleshooting.md#requests-fail).
+> **The URL was printed but "can't resolve host"?** Brand-new tunnel names can take a little while to reach your internet provider's DNS (often a minute or two). The tunnel is fine. Wait a minute and try again, or see [the troubleshooting entry](docs/troubleshooting.md#requests-fail).
 
 Test it from another device (your phone on mobile data is a great check that it's truly reachable from anywhere) using the same request as above, with the public URL in place of `http://localhost:4000`.
 

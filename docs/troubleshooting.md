@@ -89,12 +89,22 @@ sed -i 's/\r$//' scripts/start.sh        # on macOS: sed -i '' 's/\r$//' scripts
 | **Works on `localhost`, fails on the public URL** | Test the layers above. Also check you used `https://` and the `/v1` path, and that the tunnel process is still running. |
 | **Public URL returns 404 with an empty body** | Quick tunnel only: cloudflared picked up your `~/.cloudflared/config.yml` and its rules overrode the quick tunnel. The scripts already prevent this. If you run cloudflared by hand, add `--config cloudflared/quick-tunnel.yml` (see [tunnels.md](tunnels.md#option-a-quick-tunnel-default)). |
 | **Public URL stopped working / "can't resolve host"** | Quick-tunnel URLs change every time you start. Use the newly printed URL. For a permanent one, see [tunnels.md](tunnels.md). |
-| **The URL was just printed but "could not resolve host" / `ERR_NAME_NOT_RESOLVED` / `getaddrinfo failed`** | The tunnel is fine, but your internet provider's DNS server hasn't learned the brand-new name yet. Cloudflare's `1.1.1.1` and Google's `8.8.8.8` often learn it sooner than an ISP's resolver does. Wait a minute and retry (don't keep hammering it, since failed lookups can be cached), or switch your DNS to `1.1.1.1` / `8.8.8.8`, or try from another network such as your phone. |
+| **The URL was just printed but "could not resolve host" / `ERR_NAME_NOT_RESOLVED` / `getaddrinfo failed`** | The tunnel is fine, but your internet provider's DNS server hasn't learned the brand-new name yet. Cloudflare's `1.1.1.1` and Google's `8.8.8.8` often learn it sooner than an ISP's resolver does. This often takes a minute or two (about 80 seconds on one home network), even though the script prints the URL within seconds. Wait and retry (don't keep hammering it, since failed lookups can be cached), or switch your DNS to `1.1.1.1` / `8.8.8.8`, or try from another network such as your phone. |
 | **HTTP 524 or a timeout on a long request** | Cloudflare gives up on requests that return no data for about 100 seconds and return HTTP 524. Use streaming (`"stream": true`), which sends data continuously. |
 | **Reply has empty `content`, `finish_reason` is `"length"`** | A "thinking" model spent its whole `max_tokens` budget reasoning. Raise `max_tokens` or omit it. See [using-the-api.md](using-the-api.md#good-to-know). |
 | **The first request is very slow** | Ollama is loading the model into memory (and unloads it after ~5 idle minutes by default). Later requests are faster. |
 | **Very slow responses all the time** | The model may be too big for your hardware, or running on CPU instead of GPU. That's Ollama's territory. Try a smaller model, and check Ollama's GPU documentation. |
 | **An app's model dropdown is empty or shows `*`** | The default catch-all config doesn't enumerate models. Type the name manually, or pin models. See [using-the-api.md](using-the-api.md#the-model-list-shows-odd-entries). |
+
+## macOS and Linux
+
+**Leftover processes after the script was killed.** Ctrl+C and closing the Terminal window both stop LiteLLM and the tunnel together. But `kill -9` on the script (or anything else that can't be caught) kills only the script: LiteLLM and cloudflared keep running, and the public URL keeps working. Stop them with:
+
+```bash
+pkill -f litellm; pkill -f cloudflared
+```
+
+Stopping only LiteLLM leaves the tunnel up, and the public URL then returns HTTP 502. `pkill -f cloudflared` stops *every* cloudflared on the machine, including a named-tunnel service you run separately, so look first with `pgrep -fl cloudflared`.
 
 ## Windows-specific
 

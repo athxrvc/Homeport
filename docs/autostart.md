@@ -2,7 +2,7 @@
 
 Everything works fine if you start the gateway by hand when you want it. This page is for when you want the URL to be **always available whenever your computer is on**, without you doing anything.
 
-> **Status.** The Windows Scheduled Task recipe works on Windows 11 as a normal (non-admin) user. The Linux systemd and macOS launchd recipes below haven't been run by the maintainers. If you use one, please open an issue or PR with what worked or didn't.
+> **Status.** The Windows Scheduled Task recipe works on Windows 11 as a normal (non-admin) user, and the macOS launchd recipe works on macOS 27 (Apple Silicon). An actual reboot or logon hasn't been tried with either, and the Linux systemd recipe hasn't been run by the maintainers. If you use one, please open an issue or PR with what worked or didn't.
 
 ## Before you set this up
 
@@ -89,6 +89,14 @@ loginctl enable-linger "$USER"
 
 ## macOS: launchd agent
 
+> **Keep the project folder out of Documents, Desktop, Downloads and iCloud Drive.** macOS privacy protection stops background jobs from reading them. The agent loads but exits with status 126 ("Operation not permitted") and the gateway never starts. Put the project somewhere unprotected, such as `~/homeport`.
+
+A fresh Mac may not have the LaunchAgents folder yet:
+
+```bash
+mkdir -p ~/Library/LaunchAgents
+```
+
 Create `~/Library/LaunchAgents/com.homeport.plist` (change the paths):
 
 ```xml
@@ -117,10 +125,17 @@ Create `~/Library/LaunchAgents/com.homeport.plist` (change the paths):
 
 `launchd` does not expand `$HOME`, so write the full path to your home directory (for example `/Users/you/.local/bin`).
 
+Start it, check it, and stop it:
+
 ```bash
-launchctl load ~/Library/LaunchAgents/com.homeport.plist
-launchctl unload ~/Library/LaunchAgents/com.homeport.plist   # to stop
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.homeport.plist
+launchctl list | grep homeport
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.homeport.plist   # to stop
 ```
+
+The older `launchctl load` and `unload` still work but are deprecated, and `load` on a missing file prints "Load failed" yet exits with status 0, so confirm with `launchctl list`.
+
+Because of `KeepAlive`, launchd restarts the script within about 15 seconds whenever it exits, including when LiteLLM or the tunnel dies. If you add `StandardOutPath` for logging, remember that the script's startup summary prints your API key, so that file would contain it (and may be readable by other users). The script's own logs in `logs/` don't contain the key.
 
 ## Checking that it survived a reboot
 

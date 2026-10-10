@@ -25,6 +25,8 @@ Whoever can use your gateway can use your **GPU/CPU time, electricity and model*
 - **It's a single shared secret.** Anyone you give it to has full access, and there are no per-person keys or usage limits in this setup. Share it only with people (and apps) you'd trust with your computer's resources.
 - **Don't put it in client-side code**, meaning anything a browser downloads (a website's JavaScript, a mobile app you distribute). Anyone can read it from there. Keep it on servers or in local-only tools.
 - **Use environment variables** in your own code rather than pasting the key into source files.
+- **Keep `.env` private on macOS and Linux.** `start.sh` creates it readable only by you (`chmod 600`), but a `.env` made by hand or by an earlier version may be readable by other users on the machine. Fix it with `chmod 600 .env`.
+- **The start script prints your key** in its startup summary. If you redirect its output to a file (a launchd `StandardOutPath`, `nohup ... > file`), that file contains the key, so keep it private.
 
 ### If your key leaks, or you just want a new one
 

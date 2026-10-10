@@ -117,7 +117,7 @@ Read [docs/security.md](docs/security.md) before publishing a URL. To report a v
 
 ## Status
 
-Homeport has been run on **Windows 11** (PowerShell and Git Bash) with Ollama 0.30.7, LiteLLM 1.101.0 and cloudflared 2026.7.0, and on **macOS** (Apple Silicon): `install.sh` and a local run with Python 3.12 and LiteLLM 1.104.2, and a quick tunnel with cloudflared 2026.10.0. `install.ps1` hasn't been run on Windows yet. It hasn't been tried yet on native Linux, with a real named Cloudflare tunnel, or with Tailscale, so those paths are documented but unverified. If you try one, an issue saying how it went is a welcome contribution.
+Homeport has been run on **Windows 11** (PowerShell and Git Bash) and on **macOS 27 (Apple Silicon)**, with a local run, a quick tunnel and the autostart recipe on each (Windows Scheduled Task, macOS launchd). Versions used: Ollama 0.30 to 0.40, LiteLLM 1.101 to 1.104 and cloudflared 2026.7 to 2026.10. It hasn't been tried yet on native Linux or an Intel Mac, with `install.ps1`, a real named Cloudflare tunnel, Tailscale, a reboot with autostart enabled, or from a different network (such as a phone on mobile data), so those paths are documented but unverified. If you try one, an issue saying how it went is a welcome contribution.
 
 ## Contributing
 
