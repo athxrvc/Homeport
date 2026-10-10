@@ -16,7 +16,7 @@ while [ $# -gt 0 ]; do
     --model)     MODEL="${2:-}"; shift 2 ;;
     --no-model)  PULL_MODEL=0; shift ;;
     --no-tunnel) TUNNEL=0; shift ;;
-    -h|--help) sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown option: $1 (try --help)" >&2; exit 1 ;;
   esac
 done
@@ -41,7 +41,8 @@ fi
 step "Python 3.10 or newer"
 py_ok() { "$1" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)' 2>/dev/null; }
 PY=""
-for c in python3.13 python3.12 python3.11 python3.10 python3; do
+# Prefer the versions LiteLLM is most tested on, then anything newer.
+for c in python3.12 python3.13 python3.11 python3.10 python3.14 python3.15 python3; do
   if have "$c" && py_ok "$c"; then PY="$(command -v "$c")"; break; fi
 done
 if [ -z "$PY" ]; then

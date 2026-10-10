@@ -17,7 +17,7 @@ while [ $# -gt 0 ]; do
     --tunnel) TUNNEL="${2:-}"; shift 2 ;;
     --port)   PORT="${2:-}"; shift 2 ;;
     --host)   HOST="${2:-}"; shift 2 ;;
-    -h|--help) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown option: $1 (try --help)" >&2; exit 1 ;;
   esac
 done
@@ -50,7 +50,7 @@ EXAMPLE_MODEL="$(printf '%s' "$TAGS" | grep -o '"name":"[^"]*"' | head -n1 | cut
 # --- 2. .env (create with a fresh master key on first run) --------------------
 if [ ! -f .env ]; then
   KEY="sk-$(head -c 32 /dev/urandom | base64 | tr '+/' '-_' | tr -d '=\n')"
-  sed "s|^LITELLM_MASTER_KEY=.*|LITELLM_MASTER_KEY=$KEY|" .env.example > .env
+  (umask 077; sed "s|^LITELLM_MASTER_KEY=.*|LITELLM_MASTER_KEY=$KEY|" .env.example > .env)   # owner-only: it holds the key
   echo "Created .env with a new master key."
 fi
 set -a; . ./.env; set +a

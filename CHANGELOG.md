@@ -14,6 +14,9 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - `CONTRIBUTING.md`, `SECURITY.md`, issue and pull request templates.
 
 ### Fixed
+- `start.sh` now creates `.env` readable only by your own user account (it was world-readable), since it holds the API key.
+- `start.sh --help` and `install.sh --help` printed a stray `set -euo pipefail` line.
+- `install.sh` skipped a Homebrew Python 3.14 and installed Python 3.12 when it didn't need to.
 - `master_key` was under `litellm_settings`, where LiteLLM ignores it, leaving the API unauthenticated. It now lives under `general_settings`.
 - The cloudflared template used `hostname: https://...`; hostnames must not include a scheme.
 - Renamed the misspelled `Cloudfared/` directory to `cloudflared/`.
