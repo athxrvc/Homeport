@@ -60,7 +60,7 @@ Windows (PowerShell, uses winget):
 .\scripts\start.ps1
 ```
 
-The install script is safe to re-run, and it keeps LiteLLM in a private `.venv` folder inside the project, so it never touches your other Python packages or your `PATH`. Prefer to install things yourself? The [setup guide](SETUP.md) covers each one by hand.
+The install script is safe to re-run and only installs what's missing. LiteLLM goes in a private `.venv` folder inside the project, so your other Python packages are left alone. On Windows it uses winget for Python, cloudflared and Ollama. On macOS it downloads them from their official sources, with no Homebrew and no admin password. On Linux it needs Python 3.10 or newer already installed, and Ollama's own installer may ask for your password. Prefer to install things yourself? The [setup guide](SETUP.md) covers each one by hand.
 
 The first run creates a `.env` with a random API key. When everything is up, the script prints your **public URL**, your **API key**, and a command to try. Use them with any OpenAI-compatible client:
 
@@ -117,7 +117,9 @@ Read [docs/security.md](docs/security.md) before publishing a URL. To report a v
 
 ## Status
 
-Homeport has been run on **Windows 11** (PowerShell and Git Bash) and on **macOS 27 (Apple Silicon)**, with a local run, a quick tunnel and the autostart recipe on each (Windows Scheduled Task, macOS launchd). Versions used: Ollama 0.30 to 0.40, LiteLLM 1.101 to 1.104 and cloudflared 2026.7 to 2026.10. It hasn't been tried yet on native Linux or an Intel Mac, with `install.ps1`, a real named Cloudflare tunnel, Tailscale, a reboot with autostart enabled, or from a different network (such as a phone on mobile data), so those paths are documented but unverified. If you try one, an issue saying how it went is a welcome contribution.
+Homeport has been run on **Windows 11** (PowerShell and Git Bash) and on **macOS 27 (Apple Silicon)**, with a local run, a quick tunnel and the autostart recipe on each (Windows Scheduled Task, macOS launchd). Versions used: Ollama 0.30 to 0.40, LiteLLM 1.101 to 1.104 and cloudflared 2026.7 to 2026.10.
+
+Not tried yet, so documented but unverified: native Linux and Intel Macs, `install.ps1`, a real named Cloudflare tunnel, Tailscale, a reboot with autostart enabled, and reaching a tunnel from a different network (such as a phone on mobile data). The macOS `install.sh` was checked step by step on a Mac, but the finished script hasn't been run there end to end. If you try one of these, an issue saying how it went is a welcome contribution.
 
 ## Contributing
 
