@@ -2,22 +2,17 @@
 # Install everything Homeport needs: Ollama, LiteLLM (in a private .venv) and cloudflared.
 # Safe to run again: anything already installed is kept, and LiteLLM is upgraded.
 # On macOS everything is downloaded from its official source: no Homebrew, no sudo.
+# It doesn't download a model: pull the one you want with `ollama pull <name>`.
 #
-# Usage: scripts/install.sh [--model NAME] [--no-model] [--no-tunnel]
-#   --model NAME  Model to pull if Ollama has none yet (default llama3.2, about 2 GB)
-#   --no-model    Don't pull a model
+# Usage: scripts/install.sh [--no-tunnel]
 #   --no-tunnel   Skip cloudflared (local-only use)
 set -euo pipefail
 
-MODEL=llama3.2
-PULL_MODEL=1
 TUNNEL=1
 while [ $# -gt 0 ]; do
   case "$1" in
-    --model)     MODEL="${2:-}"; shift 2 ;;
-    --no-model)  PULL_MODEL=0; shift ;;
     --no-tunnel) TUNNEL=0; shift ;;
-    -h|--help) sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown option: $1 (try --help)" >&2; exit 1 ;;
   esac
 done
@@ -181,24 +176,16 @@ if ! ollama_up; then
 fi
 
 # --- 5. A model ---------------------------------------------------------------
+# Homeport doesn't pick a model for you: pull the one you want (https://ollama.com/library).
 if ! ollama_up; then
   echo "Ollama is installed but not running. Start it (open the Ollama app or run 'ollama serve') before scripts/start.sh."
 elif curl -s --max-time 5 http://127.0.0.1:11434/api/tags | grep -q '"name"'; then
   echo "Ollama is running and has models."
-elif [ "$PULL_MODEL" = 1 ]; then
-  step "Pulling $MODEL (first model; this can take a while)"
-  OLLAMA_BIN="$(ollama_bin || true)"
-  if [ -n "$OLLAMA_BIN" ]; then
-    "$OLLAMA_BIN" pull "$MODEL"
-  else
-    # No command-line tool to hand: ask the running Ollama to pull it (no progress bar).
-    echo "Pulling through Ollama's API ..."
-    curl -fsS -X POST http://127.0.0.1:11434/api/pull -d "{\"model\":\"$MODEL\",\"stream\":false}" | grep -q success \
-      || fail "Couldn't pull $MODEL. Check the model name and your internet connection."
-    echo "Pulled $MODEL."
-  fi
 else
-  echo "Ollama has no models yet. Pull one before starting, e.g.: ollama pull llama3.2"
+  if have ollama; then OLLAMA_CMD=ollama; else OLLAMA_CMD="$(ollama_bin || true)"; fi
+  echo "Ollama has no models yet. Pull the one you want before starting, for example:"
+  echo "  ${OLLAMA_CMD:-ollama} pull llama3.2"
+  echo "(Browse models at https://ollama.com/library)"
 fi
 
 echo

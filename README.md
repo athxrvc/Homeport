@@ -44,12 +44,13 @@ git clone https://github.com/athxrvc/homeport.git
 cd homeport
 ```
 
-Install everything it needs ([Ollama](https://ollama.com), [LiteLLM](https://github.com/BerriAI/litellm), [cloudflared](https://github.com/cloudflare/cloudflared), a recent Python, and a first model if you have none) with one script, then start the gateway.
+Install everything it needs ([Ollama](https://ollama.com), [LiteLLM](https://github.com/BerriAI/litellm), [cloudflared](https://github.com/cloudflare/cloudflared), and a recent Python) with one script, pull the model you want, then start the gateway.
 
 macOS / Linux:
 
 ```bash
 ./scripts/install.sh
+ollama pull llama3.2      # or any model you like
 ./scripts/start.sh
 ```
 
@@ -57,10 +58,13 @@ Windows (PowerShell, uses winget):
 
 ```powershell
 .\scripts\install.ps1
+ollama pull llama3.2      # or any model you like
 .\scripts\start.ps1
 ```
 
 The install script is safe to re-run and only installs what's missing. LiteLLM goes in a private `.venv` folder inside the project, so your other Python packages are left alone. On Windows it uses winget for Python, cloudflared and Ollama. On macOS it downloads them from their official sources, with no Homebrew and no admin password. On Linux it needs Python 3.10 or newer already installed, and Ollama's own installer may ask for your password. Prefer to install things yourself? The [setup guide](SETUP.md) covers each one by hand.
+
+**Pick your model.** Homeport doesn't choose one for you. Pull whichever you like from the [Ollama library](https://ollama.com/library) (`llama3.2` is a small one that's good for a first test). You can pull more at any time, and the gateway picks them up straight away. If you already have models in Ollama, skip the pull line. The name to use in requests is the one `ollama list` shows. If `ollama` isn't found right after the installer set Ollama up, open a new terminal; the install script also prints the exact command to use.
 
 The first run creates a `.env` with a random API key. When everything is up, the script prints your **public URL**, your **API key**, and a command to try. Use them with any OpenAI-compatible client:
 

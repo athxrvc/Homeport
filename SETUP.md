@@ -9,7 +9,7 @@ your app --> [Cloudflare Tunnel] --> LiteLLM (:4000) --> Ollama (:11434) --> mod
              (optional)
 ```
 
-> **In a hurry?** After [getting the project](#5-get-the-project), run `./scripts/install.sh` (macOS/Linux) or `.\scripts\install.ps1` (Windows). It installs Ollama, LiteLLM, cloudflared, Python 3.10+ if needed, and a first model if you have none, so you can skip straight to [step 6](#6-first-run-local-only). Steps 2 to 4 below are the same thing done by hand.
+> **In a hurry?** After [getting the project](#5-get-the-project), run `./scripts/install.sh` (macOS/Linux) or `.\scripts\install.ps1` (Windows). It installs Ollama, LiteLLM, cloudflared and Python 3.10+ if needed, so you can skip steps 3 and 4 and the install part of step 2. It doesn't download a model: pull the one you want yourself (`ollama pull <name>`, see [step 2](#2-install-ollama-and-pull-a-model)), then go to [step 6](#6-first-run-local-only). Steps 2 to 4 below are the same thing done by hand.
 
 **Contents**
 

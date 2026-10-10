@@ -3,17 +3,12 @@
   Install everything Homeport needs: Ollama, LiteLLM (in a private .venv) and cloudflared.
 .DESCRIPTION
   Uses winget for Python, cloudflared and Ollama. Safe to run again: anything already
-  installed is kept, and LiteLLM is upgraded.
-.PARAMETER Model
-  Model to pull if Ollama has none yet (default llama3.2, about 2 GB).
-.PARAMETER NoModel
-  Don't pull a model.
+  installed is kept, and LiteLLM is upgraded. It doesn't download a model: pull the one
+  you want with `ollama pull <name>`.
 .PARAMETER NoTunnel
   Skip cloudflared (local-only use).
 #>
 param(
-  [string]$Model = 'llama3.2',
-  [switch]$NoModel,
   [switch]$NoTunnel
 )
 
@@ -106,12 +101,11 @@ if (-not $tags) {
   Write-Host "Ollama is installed but not running. Open the Ollama app (or run 'ollama serve') before scripts\start.ps1." -ForegroundColor Yellow
 } elseif (@($tags.models).Count -gt 0) {
   Write-Host 'Ollama is running and has models.'
-} elseif (-not $NoModel) {
-  Step "Pulling $Model (first model; this can take a while)"
-  & ollama pull $Model
-  if ($LASTEXITCODE -ne 0) { Fail "ollama pull $Model failed." }
 } else {
-  Write-Host 'Ollama has no models yet. Pull one before starting, e.g.: ollama pull llama3.2'
+  # Homeport doesn't pick a model for you: pull the one you want.
+  Write-Host 'Ollama has no models yet. Pull the one you want before starting, for example:'
+  Write-Host '  ollama pull llama3.2'
+  Write-Host '(Browse models at https://ollama.com/library)'
 }
 
 Write-Host ""
