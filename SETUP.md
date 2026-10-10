@@ -78,7 +78,7 @@ Ollama runs a background service on port 11434. On Windows and macOS the Ollama 
 
 The easiest way is the project's install script (after [step 5](#5-get-the-project)): `./scripts/install.sh` or `.\scripts\install.ps1`. It creates a private Python environment in `.venv` inside the project and installs LiteLLM there; the start scripts find it automatically. To install it yourself instead, either of these works.
 
-> **macOS:** the built-in `python3` is version 3.9, which is too old. LiteLLM installs and seems to run, but prints `TypeError: unsupported operand type(s) for |` errors, and pip puts the `litellm` command in `~/Library/Python/3.9/bin`, which isn't on your `PATH`. Use the install script, or `brew install python@3.12` first.
+> **macOS:** the built-in `python3` is version 3.9, which is too old. LiteLLM installs and seems to run, but prints `TypeError: unsupported operand type(s) for |` errors, and pip puts the `litellm` command in `~/Library/Python/3.9/bin`, which isn't on your `PATH`. Use the install script (it downloads its own Python if you don't have a recent one, with no Homebrew and no admin password), or install Python 3.12 from [python.org](https://www.python.org/downloads/) first.
 
 **Option 1: pip** (simplest):
 
@@ -110,11 +110,7 @@ Skip this step if you only want local use.
 winget install --id Cloudflare.cloudflared
 ```
 
-**macOS:**
-
-```bash
-brew install cloudflared
-```
+**macOS:** `./scripts/install.sh` downloads it into the project's `.venv/bin`, with no Homebrew and no admin password. To install it yourself, download `cloudflared-darwin-arm64.tgz` (Intel Macs: `cloudflared-darwin-amd64.tgz`) from Cloudflare's [download page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/), unpack it, and put the `cloudflared` file somewhere on your `PATH`.
 
 **Linux:** follow Cloudflare's [download page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/), which has packages for Debian/Ubuntu, RHEL/Fedora and others.
 
@@ -241,9 +237,9 @@ git pull
 
 If you installed LiteLLM by hand instead: `pip install -U "litellm[proxy]"` (or `uv tool upgrade litellm`).
 
-Updating cloudflared: `winget upgrade Cloudflare.cloudflared` on Windows, `brew upgrade cloudflared` on macOS.
+Updating cloudflared: `winget upgrade Cloudflare.cloudflared` on Windows. On macOS and Linux, delete `.venv/bin/cloudflared` and run `./scripts/install.sh` again.
 
-**Uninstall:** delete the project folder (that removes the `.venv` LiteLLM too). If you installed LiteLLM by hand, also run `pip uninstall litellm` (or `uv tool uninstall litellm`). Ollama and its models are separate. Remove those from Ollama's own uninstaller if you want.
+**Uninstall:** delete the project folder (that removes the `.venv` LiteLLM and the `.tools` downloads too). If you installed LiteLLM by hand, also run `pip uninstall litellm` (or `uv tool uninstall litellm`). Ollama and its models are separate. Remove those from Ollama's own uninstaller if you want.
 
 **Change your API key:** delete `.env` (or edit the `LITELLM_MASTER_KEY` line) and start the script again. Old keys stop working immediately.
 

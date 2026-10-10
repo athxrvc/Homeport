@@ -46,7 +46,7 @@ cd homeport
 
 Install everything it needs ([Ollama](https://ollama.com), [LiteLLM](https://github.com/BerriAI/litellm), [cloudflared](https://github.com/cloudflare/cloudflared), a recent Python, and a first model if you have none) with one script, then start the gateway.
 
-macOS / Linux (needs [Homebrew](https://brew.sh) on macOS):
+macOS / Linux:
 
 ```bash
 ./scripts/install.sh

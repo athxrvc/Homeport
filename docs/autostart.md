@@ -114,8 +114,8 @@ Create `~/Library/LaunchAgents/com.homeport.plist` (change the paths):
   <key>WorkingDirectory</key><string>/path/to/homeport</string>
   <key>EnvironmentVariables</key>
   <dict>
-    <!-- launchd has a minimal PATH; include where litellm and cloudflared live (Homebrew shown). -->
-    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$HOME/.local/bin</string>
+    <!-- launchd has a minimal PATH. start.sh adds the project's .venv/bin itself, so this only needs the folders of tools you installed some other way (add /opt/homebrew/bin if your cloudflared came from Homebrew). -->
+    <key>PATH</key><string>/usr/local/bin:/usr/bin:/bin</string>
   </dict>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
@@ -123,7 +123,7 @@ Create `~/Library/LaunchAgents/com.homeport.plist` (change the paths):
 </plist>
 ```
 
-`launchd` does not expand `$HOME`, so write the full path to your home directory (for example `/Users/you/.local/bin`).
+`launchd` does not expand `~` or `$HOME` in these values, so write full paths.
 
 Start it, check it, and stop it:
 

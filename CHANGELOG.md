@@ -5,7 +5,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
-- `scripts/install.sh` (macOS/Linux) and `scripts/install.ps1` (Windows): one command that installs everything Homeport needs. It finds or installs Python 3.10+ (Homebrew / winget), installs LiteLLM into a project-local `.venv`, installs cloudflared (Homebrew, winget, or a direct download into `.venv` on Linux) and Ollama, starts Ollama, and pulls a first model if there is none. The start scripts use the `.venv` copy of LiteLLM automatically, so no `PATH` changes are needed.
+- `scripts/install.sh` (macOS/Linux) and `scripts/install.ps1` (Windows): one command that installs everything Homeport needs. It finds or installs Python 3.10+ (on macOS a private copy downloaded through uv, with no Homebrew or admin password; winget on Windows), installs LiteLLM into a project-local `.venv`, installs cloudflared (Homebrew, winget, or a direct download into `.venv` on Linux) and Ollama, starts Ollama, and pulls a first model if there is none. The start scripts use the `.venv` copy of LiteLLM automatically, so no `PATH` changes are needed.
 - `scripts/start.ps1` (Windows) and `scripts/start.sh` (macOS/Linux): one command that checks prerequisites, creates `.env` with a generated API key, starts LiteLLM and an optional Cloudflare tunnel, and prints the public URL plus a ready-to-run example.
 - Catch-all model route: any model pulled into Ollama is available under its own name, with no config edits.
 - `-Tunnel quick|named|none` (`--tunnel`) modes; `-BindHost` (`--host`) and `-Port` (`--port`) options.
@@ -18,7 +18,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - Docs: how to stop leftover LiteLLM and cloudflared processes after `kill -9` on macOS/Linux; `chmod 600 .env` for an existing `.env`; a warning that redirected script output contains the API key; and a more realistic wait for a new tunnel name to resolve (a minute or two).
 - `start.sh` now creates `.env` readable only by your own user account (it was world-readable), since it holds the API key.
 - `start.sh --help` and `install.sh --help` printed a stray `set -euo pipefail` line.
-- `install.sh` skipped a Homebrew Python 3.14 and installed Python 3.12 when it didn't need to.
+- `install.sh` skipped an installed Python 3.14 and installed Python 3.12 when it didn't need to.
 - `master_key` was under `litellm_settings`, where LiteLLM ignores it, leaving the API unauthenticated. It now lives under `general_settings`.
 - The cloudflared template used `hostname: https://...`; hostnames must not include a scheme.
 - Renamed the misspelled `Cloudfared/` directory to `cloudflared/`.
@@ -32,6 +32,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - Docs: the Windows autostart recipe failed with "Access is denied" for a normal user (the trigger now uses `-User $env:USERNAME`); a ZIP download on Windows was blocked by `RemoteSigned` ("not digitally signed") and the docs now explain and give the tested fix; the Python streaming snippet wasn't self-contained; the docs now warn that `http://` tunnel URLs send the key unencrypted, list the pages reachable without a key, and describe what a fresh `pip install` of LiteLLM 1.101.0 actually shows.
 
 ### Changed
+- `install.sh` on macOS no longer uses Homebrew or asks for a password. It downloads cloudflared (into `.venv/bin`), Ollama (`Ollama.app`, into `/Applications` or `~/Applications`) and, only if no Python 3.10+ is found, a private Python through uv (into `.tools/`), all from their official sources.
 - The quick-tunnel summary now says a new URL can take a minute or two to start resolving, so a "could not resolve host" right after startup doesn't look like a failure.
 - Project renamed from "Local LLM API Gateway" to **Homeport**. Repository, clone and issue links, and the service, task and launch-agent names in the autostart guide were updated to match.
 - LiteLLM now listens on `127.0.0.1` by default instead of all interfaces.

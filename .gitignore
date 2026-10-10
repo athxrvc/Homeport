@@ -7,5 +7,6 @@ cloudflared/cert.pem
 logs/
 *.log
 
-# Python environment created by scripts/install.*
+# Python environment and private downloads created by scripts/install.*
 .venv/
+.tools/

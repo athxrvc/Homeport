@@ -105,4 +105,4 @@ Two practical consequences:
 ./scripts/install.sh                   # Windows: .\scripts\install.ps1; or, for a manual install: pip install -U "litellm[proxy]"
 ```
 
-Update Ollama through its app or installer, and cloudflared through your package manager (`winget upgrade Cloudflare.cloudflared`, `brew upgrade cloudflared`). Then `git pull` for this repo's changes (see the [CHANGELOG](../CHANGELOG.md)).
+Update Ollama through its app or installer, and cloudflared with `winget upgrade Cloudflare.cloudflared` on Windows (on macOS and Linux, delete `.venv/bin/cloudflared` and re-run `./scripts/install.sh`). Then `git pull` for this repo's changes (see the [CHANGELOG](../CHANGELOG.md)).
