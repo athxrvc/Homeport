@@ -100,7 +100,7 @@ Two practical consequences:
 ## Keep things updated
 
 ```bash
-pip install -U "litellm[proxy]"        # or: uv tool upgrade litellm
+./scripts/install.sh                   # Windows: .\scripts\install.ps1; or, for a manual install: pip install -U "litellm[proxy]"
 ```
 
 Update Ollama through its app or installer, and cloudflared through your package manager (`winget upgrade Cloudflare.cloudflared`, `brew upgrade cloudflared`). Then `git pull` for this repo's changes (see the [CHANGELOG](../CHANGELOG.md)).

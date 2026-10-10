@@ -120,7 +120,7 @@ The scripts are convenience wrappers. You can run everything yourself, for examp
 # 1. Provide the key (Linux/macOS shown)
 export LITELLM_MASTER_KEY="sk-your-key"
 
-# 2. The gateway
+# 2. The gateway (with the install script's .venv: .venv/bin/litellm, or .venv\Scripts\litellm.exe on Windows)
 litellm --config LiteLLM/config.yaml --host 127.0.0.1 --port 4000
 
 # 3. In another terminal, a tunnel (optional)

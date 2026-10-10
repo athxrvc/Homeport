@@ -29,10 +29,13 @@ cd "$ROOT"
 fail() { echo "ERROR: $*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || fail "'$1' not found. $2"; }
 
+# scripts/install.sh puts LiteLLM (and cloudflared on Linux) in .venv; prefer those.
+[ -d .venv/bin ] && export PATH="$ROOT/.venv/bin:$PATH"
+
 # --- 1. Prerequisites ---------------------------------------------------------
-need litellm 'Install it with: pip install "litellm[proxy]"'
+need litellm 'Run ./scripts/install.sh to install it.'
 need curl 'Install curl.'
-[ "$TUNNEL" = none ] || need cloudflared 'Install it from https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/'
+[ "$TUNNEL" = none ] || need cloudflared 'Run ./scripts/install.sh to install it (or use --tunnel none).'
 
 if curl -s -o /dev/null --max-time 1 "http://127.0.0.1:$PORT/"; then
   fail "Port $PORT is already in use. Stop whatever is using it, or pass --port <other>."

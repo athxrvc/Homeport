@@ -39,29 +39,28 @@ This repository is the glue: a ready-made LiteLLM config, tunnel configs, start 
 
 ## Quick start
 
-You need [Ollama](https://ollama.com), Python 3.10 or newer, and (only for a public URL) [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/). The [setup guide](SETUP.md) walks through installing each one on Windows, macOS and Linux.
-
 ```bash
 git clone https://github.com/athxrvc/homeport.git
 cd homeport
-
-ollama pull llama3.2                  # or any model you like
-pip install "litellm[proxy]"
 ```
 
-Start the gateway.
+Install everything it needs ([Ollama](https://ollama.com), [LiteLLM](https://github.com/BerriAI/litellm), [cloudflared](https://github.com/cloudflare/cloudflared), a recent Python, and a first model if you have none) with one script, then start the gateway.
 
-Windows (PowerShell):
+macOS / Linux (needs [Homebrew](https://brew.sh) on macOS):
+
+```bash
+./scripts/install.sh
+./scripts/start.sh
+```
+
+Windows (PowerShell, uses winget):
 
 ```powershell
+.\scripts\install.ps1
 .\scripts\start.ps1
 ```
 
-macOS / Linux:
-
-```bash
-./scripts/start.sh
-```
+The install script is safe to re-run, and it keeps LiteLLM in a private `.venv` folder inside the project, so it never touches your other Python packages or your `PATH`. Prefer to install things yourself? The [setup guide](SETUP.md) covers each one by hand.
 
 The first run creates a `.env` with a random API key. When everything is up, the script prints your **public URL**, your **API key**, and a command to try. Use them with any OpenAI-compatible client:
 
@@ -118,7 +117,7 @@ Read [docs/security.md](docs/security.md) before publishing a URL. To report a v
 
 ## Status
 
-Homeport has been run on **Windows 11** (PowerShell and Git Bash) with Ollama 0.30.7, LiteLLM 1.101.0 and cloudflared 2026.7.0. It hasn't been tried yet on native Linux or macOS, with a real named Cloudflare tunnel, or with Tailscale, so those paths are documented but unverified. If you try one, an issue saying how it went is a welcome contribution.
+Homeport has been run on **Windows 11** (PowerShell and Git Bash) with Ollama 0.30.7, LiteLLM 1.101.0 and cloudflared 2026.7.0, and on **macOS** (Apple Silicon): `install.sh` and a local run with Python 3.12 and LiteLLM 1.104.2, and a quick tunnel with cloudflared 2026.10.0. `install.ps1` hasn't been run on Windows yet. It hasn't been tried yet on native Linux, with a real named Cloudflare tunnel, or with Tailscale, so those paths are documented but unverified. If you try one, an issue saying how it went is a welcome contribution.
 
 ## Contributing
 

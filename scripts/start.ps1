@@ -38,9 +38,12 @@ function Require-Command($name, $hint) {
 }
 
 # --- 1. Prerequisites -------------------------------------------------------
-$litellmExe = Require-Command 'litellm' 'Install it with: pip install "litellm[proxy]"'
+# scripts\install.ps1 puts LiteLLM in .venv; prefer that copy.
+$venvLitellm = Join-Path $Root '.venv\Scripts\litellm.exe'
+if (Test-Path $venvLitellm) { $litellmExe = $venvLitellm }
+else { $litellmExe = Require-Command 'litellm' 'Run .\scripts\install.ps1 to install it.' }
 if ($Tunnel -ne 'none') {
-  $cloudflaredExe = Require-Command 'cloudflared' 'Install it from https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/'
+  $cloudflaredExe = Require-Command 'cloudflared' 'Run .\scripts\install.ps1 to install it (or use -Tunnel none).'
 }
 
 if (Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue) {

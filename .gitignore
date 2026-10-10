@@ -6,3 +6,6 @@ cloudflared/cert.pem
 # Runtime output from scripts/start.*
 logs/
 *.log
+
+# Python environment created by scripts/install.*
+.venv/

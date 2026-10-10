@@ -9,6 +9,8 @@ your app --> [Cloudflare Tunnel] --> LiteLLM (:4000) --> Ollama (:11434) --> mod
              (optional)
 ```
 
+> **In a hurry?** After [getting the project](#5-get-the-project), run `./scripts/install.sh` (macOS/Linux) or `.\scripts\install.ps1` (Windows). It installs Ollama, LiteLLM, cloudflared, Python 3.10+ if needed, and a first model if you have none, so you can skip straight to [step 6](#6-first-run-local-only). Steps 2 to 4 below are the same thing done by hand.
+
 **Contents**
 
 1. [What you need](#1-what-you-need)
@@ -74,7 +76,9 @@ Ollama runs a background service on port 11434. On Windows and macOS the Ollama 
 
 ## 3. Install LiteLLM
 
-Either of these works.
+The easiest way is the project's install script (after [step 5](#5-get-the-project)): `./scripts/install.sh` or `.\scripts\install.ps1`. It creates a private Python environment in `.venv` inside the project and installs LiteLLM there; the start scripts find it automatically. To install it yourself instead, either of these works.
+
+> **macOS:** the built-in `python3` is version 3.9, which is too old. LiteLLM installs and seems to run, but prints `TypeError: unsupported operand type(s) for |` errors, and pip puts the `litellm` command in `~/Library/Python/3.9/bin`, which isn't on your `PATH`. Use the install script, or `brew install python@3.12` first.
 
 **Option 1: pip** (simplest):
 
@@ -232,12 +236,14 @@ Put those into any OpenAI-compatible tool or SDK. Worked examples for curl, Powe
 
 ```bash
 git pull
-pip install -U "litellm[proxy]"        # or: uv tool upgrade litellm
+./scripts/install.sh                   # Windows: .\scripts\install.ps1 (upgrades LiteLLM in .venv)
 ```
+
+If you installed LiteLLM by hand instead: `pip install -U "litellm[proxy]"` (or `uv tool upgrade litellm`).
 
 Updating cloudflared: `winget upgrade Cloudflare.cloudflared` on Windows, `brew upgrade cloudflared` on macOS.
 
-**Uninstall:** delete the project folder, then `pip uninstall litellm` (or `uv tool uninstall litellm`). Ollama and its models are separate. Remove those from Ollama's own uninstaller if you want.
+**Uninstall:** delete the project folder (that removes the `.venv` LiteLLM too). If you installed LiteLLM by hand, also run `pip uninstall litellm` (or `uv tool uninstall litellm`). Ollama and its models are separate. Remove those from Ollama's own uninstaller if you want.
 
 **Change your API key:** delete `.env` (or edit the `LITELLM_MASTER_KEY` line) and start the script again. Old keys stop working immediately.
 

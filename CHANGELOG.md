@@ -5,6 +5,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- `scripts/install.sh` (macOS/Linux) and `scripts/install.ps1` (Windows): one command that installs everything Homeport needs. It finds or installs Python 3.10+ (Homebrew / winget), installs LiteLLM into a project-local `.venv`, installs cloudflared (Homebrew, winget, or a direct download into `.venv` on Linux) and Ollama, starts Ollama, and pulls a first model if there is none. The start scripts use the `.venv` copy of LiteLLM automatically, so no `PATH` changes are needed.
 - `scripts/start.ps1` (Windows) and `scripts/start.sh` (macOS/Linux): one command that checks prerequisites, creates `.env` with a generated API key, starts LiteLLM and an optional Cloudflare tunnel, and prints the public URL plus a ready-to-run example.
 - Catch-all model route: any model pulled into Ollama is available under its own name, with no config edits.
 - `-Tunnel quick|named|none` (`--tunnel`) modes; `-BindHost` (`--host`) and `-Port` (`--port`) options.
