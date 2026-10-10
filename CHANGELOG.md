@@ -32,6 +32,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - Docs: the Windows autostart recipe failed with "Access is denied" for a normal user (the trigger now uses `-User $env:USERNAME`); a ZIP download on Windows was blocked by `RemoteSigned` ("not digitally signed") and the docs now explain and give the tested fix; the Python streaming snippet wasn't self-contained; the docs now warn that `http://` tunnel URLs send the key unencrypted, list the pages reachable without a key, and describe what a fresh `pip install` of LiteLLM 1.101.0 actually shows.
 
 ### Changed
+- The quick-tunnel summary now says a new URL can take a minute or two to start resolving, so a "could not resolve host" right after startup doesn't look like a failure.
 - Project renamed from "Local LLM API Gateway" to **Homeport**. Repository, clone and issue links, and the service, task and launch-agent names in the autostart guide were updated to match.
 - LiteLLM now listens on `127.0.0.1` by default instead of all interfaces.
 - Documented Python requirement corrected to "3.10 or newer".

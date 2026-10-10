@@ -129,7 +129,10 @@ echo "    -H 'Authorization: Bearer <key>' -H 'Content-Type: application/json' \
 echo "    -d '{\"model\":\"$EXAMPLE_MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}'"
 echo
 echo "Any OpenAI SDK: base_url = $BASE/v1 , api_key = <key above> , model = $EXAMPLE_MODEL"
-[ "$TUNNEL" != quick ] || echo "Quick-tunnel URLs change every run; use --tunnel named for a permanent one."
+if [ "$TUNNEL" = quick ]; then
+  echo "Quick-tunnel URLs change every run; use --tunnel named for a permanent one."
+  echo "A new URL can take a minute or two to start resolving; if you get 'could not resolve host', wait and retry."
+fi
 echo "Press Ctrl+C to stop."
 
 CF_PID="${CF_PID:-}"

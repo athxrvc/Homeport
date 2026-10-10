@@ -202,7 +202,10 @@ try {
   Write-Host "  Invoke-RestMethod -Uri `"$base/v1/chat/completions`" -Method Post -Headers @{Authorization=`"Bearer <key>`"} -ContentType 'application/json' -Body '{`"model`":`"$example`",`"messages`":[{`"role`":`"user`",`"content`":`"Hello`"}]}'"
   Write-Host ""
   Write-Host "Any OpenAI SDK: base_url = $base/v1 , api_key = <key above> , model = $example"
-  if ($Tunnel -eq 'quick') { Write-Host "Quick-tunnel URLs change every run; use -Tunnel named for a permanent one." -ForegroundColor DarkGray }
+  if ($Tunnel -eq 'quick') {
+    Write-Host "Quick-tunnel URLs change every run; use -Tunnel named for a permanent one." -ForegroundColor DarkGray
+    Write-Host "A new URL can take a minute or two to start resolving; if you get 'could not resolve host', wait and retry." -ForegroundColor DarkGray
+  }
   Write-Host "Press Ctrl+C to stop." -ForegroundColor DarkGray
 
   while (-not $lite.HasExited) {
