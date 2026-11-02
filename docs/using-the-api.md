@@ -20,7 +20,7 @@ Two easy mistakes: the Base URL must end in `/v1`, and the model name must match
 | `GET /v1/models` | key | Lists models. See [the model list caveat](#the-model-list-shows-odd-entries). |
 | `GET /health/liveliness`, `GET /health/readiness` | none | Simple "is it up" checks. |
 
-Chat completions, streaming and model listing are what has been tested. LiteLLM can serve other OpenAI endpoints (for example embeddings), but they are not covered or tested here. See the [LiteLLM docs](https://docs.litellm.ai/) if you need them.
+LiteLLM can serve other OpenAI endpoints too (for example embeddings); see the [LiteLLM docs](https://docs.litellm.ai/) if you need them.
 
 ## curl (macOS, Linux, Git Bash)
 
@@ -143,8 +143,6 @@ Things that trip people up:
 - **Some apps ask you to choose the model from a list.** See the next section.
 - **Test with curl or the Python snippet first.** If those work and the app doesn't, the problem is the app's settings, not the gateway.
 
-This project doesn't ship instructions for specific third-party apps, because they change their menus often. If you get a particular app working, a short guide contributed to this repo would help others (see [CONTRIBUTING.md](../CONTRIBUTING.md)).
-
 ### The model list shows odd entries
 
 Apps that fill a dropdown from `GET /v1/models` will see a made-up `ollama_chat/llama2` entry (older LiteLLM versions also showed `*`) instead of your real models. That is a side effect of the default catch-all config, which lets every model work without listing them one by one. **Chat requests still work**: you can type your model name into the app manually. Don't pick `ollama_chat/llama2` from the list unless you really have that model.
@@ -170,4 +168,4 @@ Clients then use `general` as the model name. See [configuration.md](configurati
 
 **Use streaming for long answers.** Streaming delivers tokens as they're generated, through the tunnel as well as locally. It also avoids a tunnel limit: Cloudflare's proxy gives up on a request that gets no response data for roughly 100 seconds and returns **HTTP 524**. With `stream: true`, data flows continuously, so this can't happen.
 
-**Sampling parameters.** `max_tokens`, `stream` and system/user messages are tested. Other parameters such as `temperature` follow LiteLLM's Ollama support. See the [LiteLLM Ollama docs](https://docs.litellm.ai/docs/providers/ollama).
+**Other parameters.** Things like `temperature` follow LiteLLM's Ollama support; see the [LiteLLM Ollama docs](https://docs.litellm.ai/docs/providers/ollama).

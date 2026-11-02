@@ -2,14 +2,14 @@
 
 Everything works fine if you start the gateway by hand when you want it. This page is for when you want the URL to be **always available whenever your computer is on**, without you doing anything.
 
-> **Status.** The Windows Scheduled Task recipe works on Windows 11 as a normal (non-admin) user, and the macOS launchd recipe works on macOS 27 (Apple Silicon). An actual reboot or logon hasn't been tried with either, and the Linux systemd recipe hasn't been run by the maintainers. If you use one, please open an issue or PR with what worked or didn't.
+> The Windows and macOS recipes below work. The Linux one hasn't been run by the maintainers yet; issues are welcome.
 
 ## Before you set this up
 
-1. **Use a named tunnel or Tailscale Funnel.** A quick tunnel's URL is random and changes on every start, so after a reboot nobody would know the new URL. See [tunnels.md](tunnels.md).
-2. **Run the gateway by hand once first** (`start.ps1 -Tunnel named` / `start.sh --tunnel named`), so you know it works and `.env` exists.
-3. **Ollama must be running too.** The Ollama desktop app starts at login on Windows and macOS by default. On Linux, the install script sets up an `ollama` systemd service.
-4. Autostart on **login** means the gateway is only up while you're logged in. For a machine that should serve without anyone logged in, use a proper service (systemd on Linux) instead.
+- **Use a named tunnel or Tailscale Funnel** ([tunnels](tunnels.md)). A quick tunnel's URL changes every start, so after a reboot nobody would know it.
+- **Run the gateway by hand once first** (`start.ps1 -Tunnel named` / `start.sh --tunnel named`) so you know it works and `.env` exists.
+- **Ollama must be running too.** Its desktop app starts at login on Windows and macOS; on Linux its installer sets up a service.
+- These start the gateway at **login**, so it's only up while you're logged in.
 
 ## Windows: Scheduled Task
 
@@ -48,9 +48,7 @@ Stop-ScheduledTask -TaskName 'Homeport'
 Unregister-ScheduledTask -TaskName 'Homeport' -Confirm:$false
 ```
 
-`Stop-ScheduledTask` ends the whole gateway: the script places LiteLLM and the tunnel in a Windows job that is closed when the script's process ends, so nothing is left running afterwards.
-
-Because the window is hidden, the script's summary (URL, key) isn't visible. Your key is in `.env`, and your URL is the hostname you configured.
+`Stop-ScheduledTask` ends the whole gateway, tunnel included. The window is hidden, so the startup summary isn't visible: your key is in `.env` and your URL is the hostname you configured.
 
 ## Linux: systemd user service
 
@@ -133,14 +131,8 @@ launchctl list | grep homeport
 launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.homeport.plist   # to stop
 ```
 
-The older `launchctl load` and `unload` still work but are deprecated, and `load` on a missing file prints "Load failed" yet exits with status 0, so confirm with `launchctl list`.
+The older `launchctl load` / `unload` still work but are deprecated. Because of `KeepAlive`, launchd restarts the script within about 15 seconds whenever it exits, including when LiteLLM or the tunnel dies. Don't add `StandardOutPath` casually: the startup summary prints your API key, so that file would contain it.
 
-Because of `KeepAlive`, launchd restarts the script within about 15 seconds whenever it exits, including when LiteLLM or the tunnel dies. If you add `StandardOutPath` for logging, remember that the script's startup summary prints your API key, so that file would contain it (and may be readable by other users). The script's own logs in `logs/` don't contain the key.
+## Checking it after a reboot
 
-## Checking that it survived a reboot
-
-1. Reboot and log in.
-2. Wait a minute or two (Ollama and LiteLLM both take a moment to start).
-3. From another device, call your URL with your key (see [using-the-api.md](using-the-api.md)).
-
-If it doesn't work, check the logs in `logs/` and see [troubleshooting.md](troubleshooting.md).
+Reboot, log in, wait a minute or two (Ollama and LiteLLM take a moment), then call your URL with your key from another device ([using the API](using-the-api.md)). If it doesn't work, check `logs/` and [troubleshooting](troubleshooting.md).
