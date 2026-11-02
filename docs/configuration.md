@@ -131,4 +131,4 @@ On Windows PowerShell, use `$env:LITELLM_MASTER_KEY = "sk-your-key"`, and also s
 
 ## Going further with LiteLLM
 
-LiteLLM has many features this project doesn't configure: per-user API keys with budgets and rate limits, fallbacks between models, caching, request logging, and more. Most of the multi-user features need a database. This repo deliberately keeps the setup to a single master key so it stays simple. Everything LiteLLM supports is documented at [docs.litellm.ai](https://docs.litellm.ai/), and you can extend `LiteLLM/config.yaml` as far as you like. Pull requests that add well-tested, optional recipes are welcome (see [CONTRIBUTING.md](../CONTRIBUTING.md)).
+LiteLLM can do much more than this project configures (per-user keys with budgets, fallbacks between models, caching, logging); most multi-user features need a database. Homeport keeps to a single master key for simplicity. See [docs.litellm.ai](https://docs.litellm.ai/) and extend `LiteLLM/config.yaml` as far as you like.

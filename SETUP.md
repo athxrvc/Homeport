@@ -1,135 +1,70 @@
 # Setup Guide
 
-This guide takes you from nothing installed to "my local model answers requests from anywhere". It takes about 10 minutes plus model download time. Every step says what you should see, so you know it worked before moving on.
-
-**What you'll set up**
+From nothing installed to "my local model answers requests from anywhere". About 10 minutes plus model download time.
 
 ```text
 your app --> [Cloudflare Tunnel] --> LiteLLM (:4000) --> Ollama (:11434) --> model
              (optional)
 ```
 
-> **In a hurry?** After [getting the project](#5-get-the-project), run `./scripts/install.sh` (macOS/Linux) or `.\scripts\install.ps1` (Windows). It installs Ollama, LiteLLM, cloudflared and Python 3.10+ if needed, so you can skip steps 3 and 4 and the install part of step 2. It doesn't download a model: pull the one you want yourself (`ollama pull <name>`, see [step 2](#2-install-ollama-and-pull-a-model)), then go to [step 6](#6-first-run-local-only). Steps 2 to 4 below are the same thing done by hand.
-
-**Contents**
-
-1. [What you need](#1-what-you-need)
-2. [Install Ollama and pull a model](#2-install-ollama-and-pull-a-model)
-3. [Install LiteLLM](#3-install-litellm)
-4. [Install cloudflared (for a public URL)](#4-install-cloudflared-for-a-public-url)
-5. [Get the project](#5-get-the-project)
-6. [First run: local only](#6-first-run-local-only)
-7. [Go public](#7-go-public)
-8. [Use it](#8-use-it)
-9. [Stop, update, uninstall](#9-stop-update-uninstall)
-10. [Where to go next](#10-where-to-go-next)
-
 ## 1. What you need
 
-| Requirement | Notes |
-|---|---|
-| A computer that can run a model | Windows, macOS or Linux. Smaller models (1 to 4 billion parameters) run on almost anything. 7 to 8B models want roughly 8 GB of RAM or GPU memory; larger models want more. |
-| [Ollama](https://ollama.com) | Runs the model. |
-| Python **3.10 or newer** and pip | For LiteLLM. Check with `python --version`. |
-| [git](https://git-scm.com) | To clone this repo. (You can download the ZIP from GitHub instead, but on Windows that needs one extra step: see ["is not digitally signed"](docs/troubleshooting.md#launching-the-script).) |
-| [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) | **Only** for a public URL. Skip it for local-only use. |
-| A Cloudflare account and domain | **Only** for a permanent URL. The default quick tunnel needs neither. |
+- A computer that can run a model: Windows, macOS or Linux. Small models (1 to 4 billion parameters) run on almost anything; 7 to 8B models want roughly 8 GB of RAM or GPU memory.
+- [git](https://git-scm.com), to clone this repo.
+- Python 3.10 or newer. The install script finds or installs it on Windows and macOS; on Linux, install it first (for example `sudo apt install python3 python3-venv`).
 
-## 2. Install Ollama and pull a model
+The install script handles everything else (Ollama, LiteLLM, cloudflared). You only need a Cloudflare account and domain if you want a *permanent* public URL; the default quick tunnel needs neither.
 
-**Windows:** run the installer from [ollama.com/download](https://ollama.com/download), or:
-
-```powershell
-winget install Ollama.Ollama
-```
-
-**macOS:** download the app from [ollama.com/download](https://ollama.com/download).
-
-**Linux:**
-
-```bash
-curl -fsSL https://ollama.com/install.sh | sh
-```
-
-Check it's installed:
-
-```bash
-ollama --version
-```
-
-Pull a model. `llama3.2` is a small, fast one that's good for a first test; browse others in the [Ollama library](https://ollama.com/library).
-
-```bash
-ollama pull llama3.2
-ollama list
-```
-
-You should see your model listed, for example `llama3.2:latest`. **Remember that exact name**, because it is what clients will send as `model`.
-
-Optional sanity check that the model itself works:
-
-```bash
-ollama run llama3.2 "Say hello in five words"
-```
-
-Ollama runs a background service on port 11434. On Windows and macOS the Ollama app starts it for you. On Linux the installer sets up a service. If the start script later says it can't reach Ollama, start it with `ollama serve`.
-
-## 3. Install LiteLLM
-
-The easiest way is the project's install script (after [step 5](#5-get-the-project)): `./scripts/install.sh` or `.\scripts\install.ps1`. It creates a private Python environment in `.venv` inside the project and installs LiteLLM there; the start scripts find it automatically. To install it yourself instead, either of these works.
-
-> **macOS:** the built-in `python3` is version 3.9, which is too old. LiteLLM installs and seems to run, but prints `TypeError: unsupported operand type(s) for |` errors, and pip puts the `litellm` command in `~/Library/Python/3.9/bin`, which isn't on your `PATH`. Use the install script (it downloads its own Python if you don't have a recent one, with no Homebrew and no admin password), or install Python 3.12 from [python.org](https://www.python.org/downloads/) first.
-
-**Option 1: pip** (simplest):
-
-```bash
-pip install "litellm[proxy]"
-```
-
-**Option 2: [uv](https://docs.astral.sh/uv/)** (keeps it isolated from your other Python packages):
-
-```bash
-uv tool install "litellm[proxy]"
-```
-
-Check that the `litellm` command is found:
-
-```bash
-litellm --help
-```
-
-If you get "command not found" (or "not recognized"), the folder pip installed it into isn't on your `PATH`. On Windows that's usually `...\Python3xx\Scripts`; on Linux and macOS often `~/.local/bin`. Add it to `PATH` and open a new terminal. With uv, run `uv tool update-shell`.
-
-## 4. Install cloudflared (for a public URL)
-
-Skip this step if you only want local use.
-
-**Windows:**
-
-```powershell
-winget install --id Cloudflare.cloudflared
-```
-
-**macOS:** `./scripts/install.sh` downloads it into the project's `.venv/bin`, with no Homebrew and no admin password. To install it yourself, download `cloudflared-darwin-arm64.tgz` (Intel Macs: `cloudflared-darwin-amd64.tgz`) from Cloudflare's [download page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/), unpack it, and put the `cloudflared` file somewhere on your `PATH`.
-
-**Linux:** follow Cloudflare's [download page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/), which has packages for Debian/Ubuntu, RHEL/Fedora and others.
-
-Open a **new** terminal afterwards, and check:
-
-```bash
-cloudflared --version
-```
-
-## 5. Get the project
+## 2. Install
 
 ```bash
 git clone https://github.com/athxrvc/homeport.git
 cd homeport
 ```
 
-## 6. First run: local only
+Then run the install script.
 
-Get it working on your own machine before adding the internet. That way, if something's wrong, you know it isn't the tunnel.
+macOS / Linux:
+
+```bash
+./scripts/install.sh
+```
+
+Windows (PowerShell):
+
+```powershell
+.\scripts\install.ps1
+```
+
+It installs whatever is missing (Ollama, LiteLLM in a private `.venv` inside the project, cloudflared, and Python if needed) and is safe to re-run. On Windows it uses winget; on macOS it downloads from the official sources, with no Homebrew and no admin password. Add `--no-tunnel` (Windows: `-NoTunnel`) to skip cloudflared if you only want local use.
+
+> **Downloaded the ZIP instead of cloning?** On Windows you'll need one extra step: see ["is not digitally signed"](docs/troubleshooting.md#launching-the-script).
+
+<details>
+<summary>Prefer to install things by hand?</summary>
+
+- **Ollama:** the installer from [ollama.com/download](https://ollama.com/download) (Windows: `winget install Ollama.Ollama`; Linux: `curl -fsSL https://ollama.com/install.sh | sh`).
+- **LiteLLM:** `pip install "litellm[proxy]"`. It needs Python 3.10+; macOS's built-in `python3` is 3.9, which is too old. If `litellm` isn't found afterwards, pip's script folder isn't on your `PATH`.
+- **cloudflared** (only for a public URL): Windows `winget install --id Cloudflare.cloudflared`; macOS and Linux from Cloudflare's [download page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/). Open a new terminal afterwards and check `cloudflared --version`.
+
+The start scripts use the `.venv` copy of LiteLLM if it exists, otherwise whatever is on your `PATH`.
+
+</details>
+
+## 3. Pull a model
+
+Homeport doesn't choose a model for you. Pull the one you want (browse the [Ollama library](https://ollama.com/library); `llama3.2` is small and good for a first test):
+
+```bash
+ollama pull llama3.2
+ollama list
+```
+
+Remember the exact name in `ollama list` (for example `llama3.2:latest`): it's what clients send as `model`. Ollama runs in the background (the app on Windows and macOS, a service on Linux). If the start script later says it can't reach Ollama, start it with `ollama serve`. If `ollama` isn't found right after installing, open a new terminal.
+
+## 4. First run: local only
+
+Get it working on your own machine first, so if something's wrong you know it isn't the tunnel.
 
 Windows (PowerShell):
 
@@ -143,10 +78,7 @@ macOS / Linux:
 ./scripts/start.sh --tunnel none
 ```
 
-> **PowerShell says scripts are disabled?** Run it as `powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1 -Tunnel none`.
-> **macOS/Linux says permission denied?** Run `chmod +x scripts/start.sh` once.
-
-The first time, it creates a `.env` file with a randomly generated API key. After LiteLLM starts (typically 7 to 10 seconds; the very first launch after installing can take longer), you'll see something like:
+It creates a `.env` file with a random API key the first time. After a few seconds you'll see:
 
 ```text
 Gateway is up.
@@ -155,9 +87,7 @@ Gateway is up.
   Models    : llama3.2:latest
 ```
 
-Leave that window open. In a **second terminal**, try three things.
-
-**1. A request with your key should get a reply** (use your key and model name):
+Leave that window open and, in a **second terminal**, send a request with your key and model name. The first one can be slow while Ollama loads the model.
 
 Windows (PowerShell):
 
@@ -176,15 +106,11 @@ curl http://localhost:4000/v1/chat/completions \
   -d '{"model":"llama3.2:latest","messages":[{"role":"user","content":"Say hi"}]}'
 ```
 
-The first request can take a while, since Ollama is loading the model into memory. You should get back JSON containing `"choices"` with the model's answer.
+You should get JSON with `"choices"` holding the model's answer. The same request **without** the key should be refused (an error, no answer; the status is usually 400 or 500 rather than 401, see [security](docs/security.md#about-the-error-codes)). Your key is in `.env` if you need it again.
 
-**2. A request without the key should be refused.** Run the same command without the `Authorization` header. You should get an error and **no** model answer. (The status code is usually 400 or 500 rather than 401. That's a quirk of LiteLLM's error handling and is harmless. See [docs/security.md](docs/security.md#about-the-error-codes).)
+Works? Stop with **Ctrl+C**. If not, see [troubleshooting](docs/troubleshooting.md). (Windows says scripts are disabled? Run `powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1 -Tunnel none`. macOS/Linux says permission denied? Run `chmod +x scripts/*.sh` once.)
 
-**3. Your key** lives in `.env` if you need to look it up again.
-
-Everything worked? Stop the gateway with **Ctrl+C** and continue. If something didn't, see [docs/troubleshooting.md](docs/troubleshooting.md).
-
-## 7. Go public
+## 5. Go public
 
 Start it again without `-Tunnel none`. The default is a free **quick tunnel**:
 
@@ -200,19 +126,12 @@ macOS / Linux:
 ./scripts/start.sh
 ```
 
-After 10 to 20 seconds you'll see a **Public URL** like `https://some-random-words.trycloudflare.com/v1`. That's it. Anyone who has that URL **and your API key** can use your model while this window stays open.
+After 10 to 20 seconds you'll see a **Public URL** like `https://some-random-words.trycloudflare.com/v1`. Anyone with that URL **and your API key** can use your model while the window stays open. Try it from another device, such as your phone on mobile data, using the same request with the public URL instead of `http://localhost:4000`.
 
-> **The URL was printed but "can't resolve host"?** Brand-new tunnel names can take a little while to reach your internet provider's DNS (often a minute or two). The tunnel is fine. Wait a minute and try again, or see [the troubleshooting entry](docs/troubleshooting.md#requests-fail).
+- A new URL can take a minute or two to start resolving, so "can't resolve host" right after startup is normal. Wait and retry.
+- Quick-tunnel URLs change every run. For a permanent one, see [tunnels](docs/tunnels.md) (`-Tunnel named`, or Tailscale Funnel), and add [autostart](docs/autostart.md) to have it come up by itself.
 
-Test it from another device (your phone on mobile data is a great check that it's truly reachable from anywhere) using the same request as above, with the public URL in place of `http://localhost:4000`.
-
-**Quick-tunnel URLs change every time you start the script.** That's fine for trying things out. For a permanent URL, see the options in [docs/tunnels.md](docs/tunnels.md):
-
-- **Your own domain on Cloudflare:** `-Tunnel named` / `--tunnel named`
-- **No domain:** Tailscale Funnel
-- **Always on:** add [autostart](docs/autostart.md)
-
-## 8. Use it
+## 6. Use it
 
 You need three values:
 
@@ -220,34 +139,13 @@ You need three values:
 |---|---|
 | **Base URL** | `https://<your-url>/v1` (or `http://localhost:4000/v1` locally) |
 | **API key** | the `sk-...` key from `.env` |
-| **Model** | the exact name from `ollama list`, e.g. `llama3.2:latest` |
+| **Model** | the exact name from `ollama list` |
 
-Put those into any OpenAI-compatible tool or SDK. Worked examples for curl, PowerShell, Python and JavaScript, streaming, and connecting chat apps are in [docs/using-the-api.md](docs/using-the-api.md).
+Put them into any OpenAI-compatible tool or SDK. Examples for curl, PowerShell, Python and JavaScript, streaming, and chat apps are in [using-the-api](docs/using-the-api.md).
 
-## 9. Stop, update, uninstall
+## 7. Stop, update, uninstall
 
-**Stop:** press **Ctrl+C** in the window running the script. It stops LiteLLM and the tunnel for you.
-
-**Update:**
-
-```bash
-git pull
-./scripts/install.sh                   # Windows: .\scripts\install.ps1 (upgrades LiteLLM in .venv)
-```
-
-If you installed LiteLLM by hand instead: `pip install -U "litellm[proxy]"` (or `uv tool upgrade litellm`).
-
-Updating cloudflared: `winget upgrade Cloudflare.cloudflared` on Windows. On macOS and Linux, delete `.venv/bin/cloudflared` and run `./scripts/install.sh` again.
-
-**Uninstall:** delete the project folder (that removes the `.venv` LiteLLM and the `.tools` downloads too). If you installed LiteLLM by hand, also run `pip uninstall litellm` (or `uv tool uninstall litellm`). Ollama and its models are separate. Remove those from Ollama's own uninstaller if you want.
-
-**Change your API key:** delete `.env` (or edit the `LITELLM_MASTER_KEY` line) and start the script again. Old keys stop working immediately.
-
-## 10. Where to go next
-
-- [docs/using-the-api.md](docs/using-the-api.md): code examples and app connections
-- [docs/tunnels.md](docs/tunnels.md): permanent URLs
-- [docs/autostart.md](docs/autostart.md): start on boot
-- [docs/configuration.md](docs/configuration.md): change ports, pin models, add aliases
-- [docs/security.md](docs/security.md): read before sharing your URL
-- [docs/troubleshooting.md](docs/troubleshooting.md): when something's off
+- **Stop:** Ctrl+C in the script's window. It stops LiteLLM and the tunnel.
+- **Update:** `git pull`, then run the install script again (it upgrades LiteLLM). To update cloudflared on Windows use `winget upgrade Cloudflare.cloudflared`; on macOS and Linux delete `.venv/bin/cloudflared` and re-run the script.
+- **Uninstall:** delete the project folder (that removes `.venv` and `.tools`). If you installed LiteLLM by hand, also `pip uninstall litellm`. Ollama and its models are separate; remove them with Ollama's own uninstaller.
+- **Change your API key:** delete `.env` (or edit the `LITELLM_MASTER_KEY` line) and start the script again. The old key stops working immediately.
